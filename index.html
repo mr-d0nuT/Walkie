@@ -354,6 +354,7 @@ const isDesktop = () => matchMedia('(min-width:840px)').matches;
 const I = {
   es: {
     offline_banner: 'Sin conexión · reintentando…', ms_on: 'Escuchando el canal',
+    bg_ok: 'Pantalla apagada {0}: la app siguió escuchando.', bg_bad: '⚠ Pantalla apagada {0}: el móvil durmió la app hasta {1} s seguidos. Puede que te hayas perdido algo.', bg_rx: 'Transmisiones recibidas: {0}.', bg_drops: 'Cortes de conexión: {0}.',
     out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
     out_spk_ios: 'Altavoz: volumen reforzado. Para sacar el audio por el altavoz el iPhone necesita iOS 16.4 o superior.',
     out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (modo llamada). Pega el móvil a la oreja.',
@@ -385,6 +386,7 @@ const I = {
   },
   ca: {
     offline_banner: 'Sense connexió · reintentant…', ms_on: 'Escoltant el canal',
+    bg_ok: 'Pantalla apagada {0}: l\'app ha continuat escoltant.', bg_bad: '⚠ Pantalla apagada {0}: el mòbil ha adormit l\'app fins a {1} s seguits. Pot ser que t\'hagis perdut alguna cosa.', bg_rx: 'Transmissions rebudes: {0}.', bg_drops: 'Talls de connexió: {0}.',
     out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
     out_spk_ios: 'Altaveu: volum reforçat. Per treure l\'àudio per l\'altaveu l\'iPhone necessita iOS 16.4 o superior.',
     out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (mode trucada). Enganxa el mòbil a l\'orella.',
@@ -579,7 +581,7 @@ const S = {
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
   out: 'spk', boost: null, comp: null, lp: null,
-  skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0, ka: null
+  skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0, ka: null, kd: null
 };
 const seen = new Set(), seenQ = [];
 const now = () => Date.now() + S.skew;      // hora corregida con la del servidor, por si el reloj del móvil está mal
@@ -719,6 +721,8 @@ async function initAudio() {
     S.lp = lp;
     S.ka = S.ctx.createGain(); S.ka.gain.value = 0;                 // tono inaudible (25 Hz, muy bajo): la pestaña cuenta como «sonando» y el sistema no la duerme
     const ko = S.ctx.createOscillator(); ko.frequency.value = 25; ko.connect(S.ka).connect(lp); ko.start();
+    S.kd = S.ctx.createGain(); S.kd.gain.value = 0;                 // y también directo a la salida real: con silencio absoluto, Chrome en Android la cambia por una falsa que se para con la pantalla apagada
+    ko.connect(S.kd).connect(S.ctx.destination);
     S.master.connect(S.boost).connect(S.comp).connect(lp).connect(S.ctx.destination);
     S.ctx.onstatechange = () => { checkAudio(); if (S.ctx.state !== 'running' && S.joined) setTimeout(wakeAudio, 300); };
   }
@@ -727,6 +731,7 @@ async function initAudio() {
 function wakeAudio() {                      // cualquier toque en la pantalla reactiva el audio si el navegador lo había dormido
   if (S.ctx && S.ctx.state !== 'running') S.ctx.resume().then(checkAudio).catch(() => {});
   if (out.el && out.mode !== 'direct' && out.el.srcObject && out.el.paused) out.el.play().then(checkAudio, () => {});
+  if (keep.el && S.joined && keep.el.paused) keep.el.play().catch(() => {});
 }
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, wakeAudio, { capture: true, passive: true }));
 function checkAudio() {
@@ -776,10 +781,8 @@ async function initMic() {
 }
 
 /* ---------- salida de audio: auricular / altavoz ---------- */
-// La mezcla no va directa al altavoz: pasa por un <audio>. Así el navegador la trata como «reproducción multimedia»
-// (igual que una radio online) y no congela la página cuando se apaga la pantalla.
-//   «el»  = <audio> directo  → canal multimedia (altavoz)
-//   «rtc» = bucle WebRTC local → Android lo reproduce como audio de llamada (auricular)
+// Altavoz: la mezcla va directa a la salida de Web Audio (canal multimedia).
+// Auricular («rtc»): pasa por un bucle WebRTC local, que Android reproduce como audio de llamada.
 const out = { mode: 'direct', dest: null, el: null, pcA: null, pcB: null, q: Promise.resolve() };
 function outEl() {
   if (out.el) return out.el;
@@ -808,8 +811,7 @@ async function doRoute(mode) {
     if (!out.dest) out.dest = S.ctx.createMediaStreamDestination();
     const el = outEl();
     rtcClose();
-    if (mode === 'el') el.srcObject = out.dest.stream;
-    else {
+    {
       const pcA = out.pcA = new RTCPeerConnection(), pcB = out.pcB = new RTCPeerConnection();
       pcA.onicecandidate = e => { if (e.candidate) pcB.addIceCandidate(e.candidate).catch(() => {}); };
       pcB.onicecandidate = e => { if (e.candidate) pcA.addIceCandidate(e.candidate).catch(() => {}); };
@@ -826,6 +828,25 @@ async function doRoute(mode) {
     return true;
   } catch { toDirect(); return false; }
 }
+// Con la pantalla apagada, Android solo deja seguir a las páginas que están «reproduciendo» algo. Se reproduce en bucle
+// un archivo de audio inaudible: el sistema lo trata como una radio online (ficha en la pantalla de bloqueo) y no duerme la app.
+const keep = { el: null };
+function keepOn() {
+  if (IOS) return;                          // en iPhone no se toca la sesión de audio
+  if (!keep.el) {
+    const sr = 8000, n = sr * 10, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    const wr = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    wr(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); wr(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); wr(36, 'data'); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(24 * Math.sin(2 * Math.PI * 25 * i / sr)), true);   // 25 Hz a −63 dB: no se oye
+    const el = document.createElement('audio');
+    el.src = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })); el.loop = true; el.style.display = 'none';
+    el.addEventListener('pause', () => { if (S.joined) setTimeout(() => { if (S.joined) el.play().catch(() => {}); }, 800); });   // p. ej. tras una llamada
+    document.body.append(el); keep.el = el;
+  }
+  keep.el.play().catch(() => {});           // sin toque previo el navegador lo bloquea: se reintenta al primer toque
+}
+function keepOff() { if (keep.el) keep.el.pause(); }
 function mediaSess(on) {                    // ficha en la pantalla de bloqueo; los botones de pausa no detienen la escucha
   if (!('mediaSession' in navigator)) return;
   try {
@@ -833,7 +854,7 @@ function mediaSess(on) {                    // ficha en la pantalla de bloqueo; 
       navigator.mediaSession.metadata = new MediaMetadata({ title: 'Walkie-Talkie', artist: L('ms_on'),
         artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
       navigator.mediaSession.playbackState = 'playing';
-      for (const act of ['play', 'pause', 'stop']) navigator.mediaSession.setActionHandler(act, () => { if (out.el && out.mode !== 'direct') out.el.play().catch(() => {}); });
+      for (const act of ['play', 'pause', 'stop']) navigator.mediaSession.setActionHandler(act, () => { if (keep.el && S.joined) keep.el.play().catch(() => {}); });
     } else { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none'; }
   } catch {}
 }
@@ -858,8 +879,7 @@ async function applyOutput(announce) {
     }
   } catch {}
   if (S.micOk && !S.tx) idleMic();
-  if (IOS || picked) await setRoute('direct');   // iPhone: la salida la decide la sesión de audio
-  else if (spk) await setRoute('el');
+  if (IOS || picked || spk) await setRoute('direct');   // iPhone: la salida la decide la sesión de audio
   else if (await setRoute('rtc') && out.mode === 'rtc') routed = true;
   $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', spk);
@@ -1006,7 +1026,7 @@ function onAudio(pt) {
   if (tx === p.doneTx) return;
   let st = p.rx;
   if (st && st.tx !== tx) { finishRx(p); st = null; }
-  if (!st) st = p.rx = { tx, base: null, got: new Set(), max: -1, endAt: 0, prev: 0 };
+  if (!st) { st = p.rx = { tx, base: null, got: new Set(), max: -1, endAt: 0, prev: 0 }; if (bg.t0) bg.rx++; }
   if (pt.length > 16) {
     const pcm = adpcmDec(pt.subarray(16), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
     const now = S.ctx.currentTime;
@@ -1347,6 +1367,7 @@ async function join() {
     const will = await seal(ctlBytes({ t: 'bye', id: S.idHex, nick: S.nick }));
     S.clients = BROKERS.map(u => Mqtt(u, S.topic, will, onMsg, upNow => {
       if (upNow && S.joined) { publish(ctlBytes({ t: 'hello', id: S.idHex, nick: S.nick })); flushOutbox(); }
+      if (!upNow && bg.t0) bg.drops++;
       render();
     }));
     S.timers = [setInterval(sweep, 2500), setInterval(renderLast, 20000)];
@@ -1359,7 +1380,7 @@ async function join() {
     log(L('in_chan', chan, S.nick), {});
     $('chatIn').disabled = false; $('chatSend').disabled = false;
     qsa('#quick button').forEach(b => { b.disabled = false; });
-    S.ka.gain.value = 0.003; mediaSess(true);
+    S.ka.gain.value = 0.003; S.kd.gain.value = 0.001; keepOn(); mediaSess(true);
     wakeLock(); checkAudio(); render();
   } catch (e) {
     log(L('err_join', e.message || e), { cls: 'err' });
@@ -1378,7 +1399,7 @@ async function leave() {
   for (const p of S.peers.values()) clearTimeout(p.tmo);
   S.peers.clear(); S.outbox = [];
   if (S.wake) { try { S.wake.release(); } catch {} S.wake = null; }
-  closeMic(); setRoute('direct'); mediaSess(false); if (S.ka) S.ka.gain.value = 0;
+  closeMic(); setRoute('direct'); mediaSess(false); keepOff(); if (S.ka) { S.ka.gain.value = 0; S.kd.gain.value = 0; }
   $('radioPanel').hidden = true; $('joinPanel').hidden = false; $('audioBanner').hidden = true;
   $('app').classList.remove('in'); setTab('radio');
   $('chatIn').disabled = true; $('chatSend').disabled = true;
@@ -1404,6 +1425,25 @@ function setTheme(th) {
   store.set('w.theme', th);
   $('themeBtn').textContent = th === 'dark' ? '☀️' : '🌙';
   const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = th === 'dark' ? '#0d0f12' : '#c8202a';
+}
+
+/* ---------- segundo plano: informe al volver ---------- */
+const bg = { t0: 0, last: 0, gap: 0, drops: 0, rx: 0 };
+setInterval(() => {
+  const n = Date.now();
+  if (bg.t0) bg.gap = Math.max(bg.gap, n - bg.last);
+  bg.last = n;
+}, 1000);
+function bgReport() {
+  const n = Date.now();
+  if (!bg.t0) return;
+  bg.gap = Math.max(bg.gap, n - bg.last);
+  const secs = Math.round((n - bg.t0) / 1000), dur = secs >= 60 ? Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s' : secs + ' s';
+  if (S.joined && secs >= 10) {
+    const asleep = bg.gap > 6000;
+    log((asleep ? L('bg_bad', dur, Math.round(bg.gap / 1000)) : L('bg_ok', dur)) + ' ' + L('bg_rx', bg.rx) + (bg.drops ? ' ' + L('bg_drops', bg.drops) : ''), asleep ? { cls: 'err' } : {});
+  }
+  bg.t0 = 0;
 }
 
 /* ---------- eventos ---------- */
@@ -1462,7 +1502,8 @@ document.addEventListener('keyup', e => {
 });
 window.addEventListener('blur', release);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { stopTx(); return; }
+  if (document.hidden) { stopTx(); bg.t0 = bg.last = Date.now(); bg.gap = bg.drops = bg.rx = 0; return; }
+  bgReport();
   if (S.joined) { wakeLock(); sendHere(); S.clients.forEach(c => c.kick()); if (S.ctx) S.ctx.resume(); }
   if (chatVisible()) { S.unread = 0; showUnread(); }
 });
@@ -1487,7 +1528,7 @@ applyLang();
 const auto = +store.get('w.auto') || 0;
 if (auto && Date.now() - auto < 12 * 3600000 && store.get('w.chan') && (!hashKey || hashKey === store.get('w.chan'))) join();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__w = S; S.ear = out;
+window.__w = S; S.ear = out; S.keep = keep;
 })();
 </script>
 </body>
