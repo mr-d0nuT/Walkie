@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>ONDA · ptt libre</title>
+<style>:root{--host-bg:#0b0d10;--host-fg:#e8eaed;--host-fg-muted:#8b929c;--host-card:#14171c;--host-card-fg:#e8eaed;--host-input:#1a1e24;--host-muted:#22272e;--host-border:#262b33;--host-border-hover:#3b4350;--host-primary:#3b82f6;--host-secondary:#1e2329;--host-secondary-fg:#e8eaed;--host-success:#22c55e;--host-error:#ef4444}body{margin:0;padding:16px;background:var(--host-bg)}</style>
+<style>:root { --host-bg: rgb(250, 248, 243); --host-fg: rgb(27, 25, 19); --host-fg-muted: rgb(78, 74, 63); --host-card: rgb(255, 254, 250); --host-card-fg: rgb(27, 25, 19); --host-input: rgb(255, 254, 250); --host-muted: rgba(0, 0, 0, 0.04); --host-border: rgba(0, 0, 0, 0.08); --host-border-hover: rgba(0, 0, 0, 0.14); --host-primary: rgb(18, 92, 161); --host-secondary: rgba(0, 0, 0, 0.04); --host-secondary-fg: rgb(27, 25, 19); --host-success: #22c55e; --host-error: #ef4444; } * { box-sizing: border-box; margin: 0; padding: 0; } :root, html, body { width: 100%; max-width: 100%; height: auto; overflow-x: hidden; overflow-y: visible; background: transparent; font-family: Inter, system-ui, -apple-system, sans-serif; } #sandbox-content { width: 100%; } @media (max-width: 640px) { :where(#sandbox-content svg, #sandbox-content img) { max-width: 100%; height: auto; } } </style>
+</head>
+<body>
+<div class="app">
+  <section class="radio">
+    <header>
+      <div class="brand">ONDA<span class="tag">ptt libre</span></div>
+      <div id="state" class="state idle">desconectado</div>
+    </header>
+
+    <div id="joinPanel" class="panel">
+      <label class="lbl" for="chan">Clave de canal</label>
+      <div class="row">
+        <input id="chan" maxlength="20" spellcheck="false" autocapitalize="characters" placeholder="CLAVE LARGA">
+        <button id="newChan" class="mini" title="Clave aleatoria de 16">↻</button>
+      </div>
+      <div id="chanCount" class="cnt ok">16 / 20 · mínimo 10</div>
+      <label class="lbl" for="nick">Indicativo</label>
+      <input id="nick" maxlength="14" placeholder="TU INDICATIVO">
+      <button id="joinBtn" class="primary">Entrar en el canal</button>
+      <p class="hint">Sin cuenta, sin email, sin número. La voz va directa entre móviles y cifrada. La clave es la única llave: con 16 caracteres al azar nadie entra por casualidad. Compártela solo con los tuyos y cámbiala si se filtra.</p>
+    </div>
+
+    <div id="radioPanel" hidden="">
+      <div class="chanbar">
+        <div class="chanwrap">
+          <div class="lbl">Clave</div>
+          <div id="chanName" class="chanval">—</div>
+        </div>
+        <div class="chanbtns">
+          <button id="copyBtn" class="mini" title="Copiar clave">copiar</button>
+          <button id="leaveBtn" class="mini danger" title="Salir">salir</button>
+        </div>
+      </div>
+
+      <div id="peers" class="peers"><div class="empty">nadie más en el canal</div></div>
+
+      <button id="ptt" class="ptt" aria-label="Pulsar para hablar">
+        <span class="pttlbl">MANTÉN PARA HABLAR</span>
+        <span class="pttsub">o toca si el bloqueo está activo</span>
+      </button>
+
+      <div class="meter"><div id="meterFill" style="width: 0px;"></div></div>
+
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="lockTgl"> bloqueo</label>
+        <label class="tg"><input type="checkbox" id="beepTgl" checked=""> pitidos</label>
+        <label class="tg vol"><span>vol</span><input type="range" id="vol" min="0" max="1" step="0.05" value="0.9"></label>
+      </div>
+    </div>
+
+    <div id="audioBanner" class="banner" hidden=""><button id="audioBtn">activar audio</button></div>
+  </section>
+
+  <section class="side">
+    <div class="sidetitle">Registro</div>
+    <div id="log" class="log"><div class="li muted">a la espera…</div></div>
+    <div class="foot">Señalización por un broker público, sin registro. El audio va P2P (DTLS-SRTP). Nada que instalar salvo el navegador.</div>
+    <button id="dlBtn" class="mini wide">Descargar la app en un archivo</button>
+    <div id="dlWrap" class="dlwrap" hidden="">
+      <div class="lbl">Archivo listo · copia si el navegador lo bloquea</div>
+      <textarea id="srcBox" readonly="" rows="12" spellcheck="false"></textarea>
+      <div class="row">
+        <button id="selAll" class="mini">Seleccionar todo</button>
+        <button id="dlAgain" class="mini">Reintentar descarga</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="sink" hidden=""></div>
+</div>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>(function() {var lastHeight = 0;var debounceTimer = null;function reportHeight() {var rect = document.body.getBoundingClientRect();var h = Math.ceil(rect.height);if (h !== lastHeight && h > 0) {lastHeight = h;window.parent.postMessage({ type: "html-sandbox-height", height: h }, "*");}}new ResizeObserver(function() {clearTimeout(debounceTimer);debounceTimer = setTimeout(reportHeight, 100);}).observe(document.body);window.addEventListener("load", function() {window.parent.postMessage({ type: "html-sandbox-ready" }, "*");});document.fonts && document.fonts.ready.then(function() {reportHeight();});})();</script>
+</body>
+</html>
