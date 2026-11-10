@@ -2,82 +2,732 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0b0d10">
+<meta name="description" content="Walkie-talkie en el navegador. Sin cuenta, sin registro, voz cifrada.">
 <title>ONDA · ptt libre</title>
-<style>:root{--host-bg:#0b0d10;--host-fg:#e8eaed;--host-fg-muted:#8b929c;--host-card:#14171c;--host-card-fg:#e8eaed;--host-input:#1a1e24;--host-muted:#22272e;--host-border:#262b33;--host-border-hover:#3b4350;--host-primary:#3b82f6;--host-secondary:#1e2329;--host-secondary-fg:#e8eaed;--host-success:#22c55e;--host-error:#ef4444}body{margin:0;padding:16px;background:var(--host-bg)}</style>
-<style>:root { --host-bg: rgb(250, 248, 243); --host-fg: rgb(27, 25, 19); --host-fg-muted: rgb(78, 74, 63); --host-card: rgb(255, 254, 250); --host-card-fg: rgb(27, 25, 19); --host-input: rgb(255, 254, 250); --host-muted: rgba(0, 0, 0, 0.04); --host-border: rgba(0, 0, 0, 0.08); --host-border-hover: rgba(0, 0, 0, 0.14); --host-primary: rgb(18, 92, 161); --host-secondary: rgba(0, 0, 0, 0.04); --host-secondary-fg: rgb(27, 25, 19); --host-success: #22c55e; --host-error: #ef4444; } * { box-sizing: border-box; margin: 0; padding: 0; } :root, html, body { width: 100%; max-width: 100%; height: auto; overflow-x: hidden; overflow-y: visible; background: transparent; font-family: Inter, system-ui, -apple-system, sans-serif; } #sandbox-content { width: 100%; } @media (max-width: 640px) { :where(#sandbox-content svg, #sandbox-content img) { max-width: 100%; height: auto; } } </style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d10'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23f5a524'/%3E%3Cpath d='M14 32a18 18 0 0 1 36 0' fill='none' stroke='%23f5a524' stroke-width='4' stroke-linecap='round' opacity='.55'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0b0d10;--card:#14171c;--input:#1a1e24;--line:#262b33;--line2:#3b4350;
+  --fg:#e8eaed;--mut:#8b929c;--amber:#f5a524;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+  padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom))}
+button,input{font:inherit;color:inherit}
+.app{max-width:920px;margin:0 auto;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:820px){.app{grid-template-columns:minmax(0,1fr) 320px;align-items:start}}
+.radio,.side{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{font-weight:800;letter-spacing:.18em;font-size:20px}
+.tag{font-weight:500;letter-spacing:.08em;font-size:11px;color:var(--mut);margin-left:10px;text-transform:uppercase}
+.state{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mut);
+  white-space:nowrap;max-width:55%;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.state.on{color:var(--green);border-color:#1d5a36}
+.state.tx{color:#fff;background:var(--red);border-color:var(--red)}
+.state.rx{color:#111;background:var(--amber);border-color:var(--amber)}
+.lbl{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
+.row{display:flex;gap:8px}
+input[type=text]{width:100%;min-width:0;background:var(--input);border:1px solid var(--line);border-radius:12px;
+  padding:13px 14px;font-size:17px;letter-spacing:.06em;outline:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+input[type=text]:focus{border-color:var(--amber)}
+.cnt{font-size:12px;margin-top:6px;color:var(--mut)}
+.cnt.ok{color:var(--green)}.cnt.bad{color:var(--red)}
+.mini{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.mini:hover{border-color:var(--line2)}
+.mini.danger{color:var(--red)}
+.primary{width:100%;margin-top:18px;background:var(--amber);color:#111;border:0;border-radius:14px;padding:15px;font-weight:700;font-size:16px;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:default}
+.hint{font-size:13px;line-height:1.5;color:var(--mut);margin-top:14px}
+.chanbar{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.chanbar .lbl{margin-top:0}
+.chanwrap{min-width:0}
+.chanval{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.08em;color:var(--amber);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chanbtns{display:flex;gap:6px;flex:none}
+.peers{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px;min-height:34px}
+.peer{font-size:13px;padding:6px 11px;border-radius:999px;background:var(--input);border:1px solid var(--line);display:flex;align-items:center;gap:7px}
+.peer::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.peer.me{color:var(--mut)}
+.peer.talk{background:var(--amber);border-color:var(--amber);color:#111;font-weight:600}
+.peer.talk::before{background:#111;animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.2}}
+.empty{font-size:13px;color:var(--mut);padding:7px 0}
+.ptt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:min(64vw,260px);aspect-ratio:1;margin:22px auto 18px;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 50% 35%,#2a3039,#171b21);border:3px solid var(--line2);
+  box-shadow:0 10px 30px #0008,inset 0 2px 0 #fff1;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .08s,box-shadow .15s}
+.ptt.tx{background:radial-gradient(circle at 50% 35%,#ff6b6b,#c81e1e);border-color:#ff8a8a;transform:scale(.96);box-shadow:0 0 0 10px #ef444433,0 0 60px #ef444466}
+.ptt.rx{border-color:var(--amber);box-shadow:0 0 0 10px #f5a52422,0 0 50px #f5a52444}
+.ptt:disabled{opacity:.45;cursor:not-allowed}
+.pttlbl{font-weight:800;letter-spacing:.1em;font-size:15px;pointer-events:none;text-align:center;padding:0 14px}
+.pttsub{font-size:11px;color:var(--mut);pointer-events:none;text-align:center;padding:0 20px}
+.ptt.tx .pttsub{color:#ffe0e0}
+.meter{height:6px;background:var(--input);border-radius:3px;overflow:hidden}
+#meterFill{height:100%;width:0;background:var(--green);border-radius:3px;transition:width .08s linear}
+.toggles{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px;font-size:13px;color:var(--mut)}
+.tg{display:flex;align-items:center;gap:7px;cursor:pointer}
+.tg input[type=checkbox]{width:17px;height:17px;accent-color:var(--amber)}
+.tg.vol{flex:1;min-width:140px}
+.tg.vol input{flex:1;accent-color:var(--amber)}
+.banner{margin-top:14px}
+.banner button{width:100%;background:var(--blue);border:0;border-radius:12px;padding:12px;font-weight:600;cursor:pointer}
+.sidetitle{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.log{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;font-size:13px}
+.li{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--input);border-radius:10px;line-height:1.3}
+.li .t{color:var(--mut);font-variant-numeric:tabular-nums;font-size:11px;flex:none}
+.li .x{flex:1;min-width:0;overflow-wrap:anywhere}
+.li.muted{color:var(--mut);background:none;padding:4px 2px}
+.li.err{color:var(--red)}
+.li button{flex:none;background:none;border:1px solid var(--line2);border-radius:8px;padding:4px 9px;cursor:pointer;font-size:12px}
+.li button:hover{border-color:var(--amber);color:var(--amber)}
+.foot{font-size:12px;line-height:1.5;color:var(--mut);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+</style>
 </head>
 <body>
 <div class="app">
   <section class="radio">
     <header>
       <div class="brand">ONDA<span class="tag">ptt libre</span></div>
-      <div id="state" class="state idle">desconectado</div>
+      <div id="state" class="state">desconectado</div>
     </header>
 
     <div id="joinPanel" class="panel">
       <label class="lbl" for="chan">Clave de canal</label>
       <div class="row">
-        <input id="chan" maxlength="20" spellcheck="false" autocapitalize="characters" placeholder="CLAVE LARGA">
+        <input type="text" id="chan" maxlength="20" spellcheck="false" autocomplete="off" autocapitalize="characters" placeholder="CLAVE LARGA">
         <button id="newChan" class="mini" title="Clave aleatoria de 16">↻</button>
       </div>
-      <div id="chanCount" class="cnt ok">16 / 20 · mínimo 10</div>
+      <div id="chanCount" class="cnt">0 / 20 · mínimo 10</div>
       <label class="lbl" for="nick">Indicativo</label>
-      <input id="nick" maxlength="14" placeholder="TU INDICATIVO">
+      <input type="text" id="nick" maxlength="14" spellcheck="false" autocomplete="off" placeholder="TU INDICATIVO">
       <button id="joinBtn" class="primary">Entrar en el canal</button>
-      <p class="hint">Sin cuenta, sin email, sin número. La voz va directa entre móviles y cifrada. La clave es la única llave: con 16 caracteres al azar nadie entra por casualidad. Compártela solo con los tuyos y cámbiala si se filtra.</p>
+      <p class="hint">Sin cuenta, sin email, sin número. La voz sale cifrada de tu dispositivo con la clave del canal. La clave es la única llave: con 16 caracteres al azar nadie entra por casualidad. Compártela solo con los tuyos y cámbiala si se filtra.</p>
     </div>
 
-    <div id="radioPanel" hidden="">
+    <div id="radioPanel" hidden>
       <div class="chanbar">
         <div class="chanwrap">
           <div class="lbl">Clave</div>
           <div id="chanName" class="chanval">—</div>
         </div>
         <div class="chanbtns">
-          <button id="copyBtn" class="mini" title="Copiar clave">copiar</button>
+          <button id="copyBtn" class="mini" title="Compartir enlace del canal">invitar</button>
           <button id="leaveBtn" class="mini danger" title="Salir">salir</button>
         </div>
       </div>
 
-      <div id="peers" class="peers"><div class="empty">nadie más en el canal</div></div>
+      <div id="peers" class="peers"></div>
 
       <button id="ptt" class="ptt" aria-label="Pulsar para hablar">
-        <span class="pttlbl">MANTÉN PARA HABLAR</span>
-        <span class="pttsub">o toca si el bloqueo está activo</span>
+        <span id="pttLbl" class="pttlbl">MANTÉN PARA HABLAR</span>
+        <span id="pttSub" class="pttsub">o la barra espaciadora</span>
       </button>
 
-      <div class="meter"><div id="meterFill" style="width: 0px;"></div></div>
+      <div class="meter"><div id="meterFill"></div></div>
 
       <div class="toggles">
         <label class="tg"><input type="checkbox" id="lockTgl"> bloqueo</label>
-        <label class="tg"><input type="checkbox" id="beepTgl" checked=""> pitidos</label>
-        <label class="tg vol"><span>vol</span><input type="range" id="vol" min="0" max="1" step="0.05" value="0.9"></label>
+        <label class="tg"><input type="checkbox" id="beepTgl" checked> pitidos</label>
+        <label class="tg vol"><span>vol</span><input type="range" id="vol" min="0" max="1.5" step="0.05" value="1"></label>
       </div>
     </div>
 
-    <div id="audioBanner" class="banner" hidden=""><button id="audioBtn">activar audio</button></div>
+    <div id="audioBanner" class="banner" hidden><button id="audioBtn">activar audio</button></div>
   </section>
 
   <section class="side">
     <div class="sidetitle">Registro</div>
     <div id="log" class="log"><div class="li muted">a la espera…</div></div>
-    <div class="foot">Señalización por un broker público, sin registro. El audio va P2P (DTLS-SRTP). Nada que instalar salvo el navegador.</div>
-    <button id="dlBtn" class="mini wide">Descargar la app en un archivo</button>
-    <div id="dlWrap" class="dlwrap" hidden="">
-      <div class="lbl">Archivo listo · copia si el navegador lo bloquea</div>
-      <textarea id="srcBox" readonly="" rows="12" spellcheck="false"></textarea>
-      <div class="row">
-        <button id="selAll" class="mini">Seleccionar todo</button>
-        <button id="dlAgain" class="mini">Reintentar descarga</button>
-      </div>
-    </div>
+    <div class="foot">Sin servidor propio ni registro: los mensajes viajan por brokers MQTT públicos, cifrados de extremo a extremo (AES-GCM) con la clave del canal. El broker solo ve ruido. Nada que instalar salvo el navegador.</div>
   </section>
-
-  <div id="sink" hidden=""></div>
 </div>
-<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-<script>(function() {var lastHeight = 0;var debounceTimer = null;function reportHeight() {var rect = document.body.getBoundingClientRect();var h = Math.ceil(rect.height);if (h !== lastHeight && h > 0) {lastHeight = h;window.parent.postMessage({ type: "html-sandbox-height", height: h }, "*");}}new ResizeObserver(function() {clearTimeout(debounceTimer);debounceTimer = setTimeout(reportHeight, 100);}).observe(document.body);window.addEventListener("load", function() {window.parent.postMessage({ type: "html-sandbox-ready" }, "*");});document.fonts && document.fonts.ready.then(function() {reportHeight();});})();</script>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const te = new TextEncoder(), td = new TextDecoder();
+const RATE = 16000, FRAME = 1920, FRAME_S = FRAME / RATE;   // 120 ms por paquete
+const MAX_TX_S = 60, JITTER_S = 0.25;
+const qs = new URLSearchParams(location.search);
+const BROKERS = qs.get('broker') ? qs.get('broker').split(',') : [
+  'wss://broker.emqx.io:8084/mqtt',
+  'wss://broker.hivemq.com:8884/mqtt',
+  'wss://test.mosquitto.org:8081/mqtt'
+];
+
+/* ---------- utilidades ---------- */
+const hex = b => Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+function cat(parts) {
+  let n = 0; for (const p of parts) n += p.length;
+  const out = new Uint8Array(n); let o = 0;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function randomKey(n) {
+  const r = crypto.getRandomValues(new Uint8Array(n));
+  return Array.from(r, x => ALPHA[x % ALPHA.length]).join('');
+}
+const cleanKey = s => s.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20);
+
+/* ---------- registro ---------- */
+function log(text, opts = {}) {
+  const box = $('log');
+  const first = box.firstElementChild;
+  if (first && first.classList.contains('muted') && !first.dataset.keep) first.remove();
+  const li = document.createElement('div');
+  li.className = 'li' + (opts.cls ? ' ' + opts.cls : '');
+  const t = document.createElement('span'); t.className = 't';
+  t.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const x = document.createElement('span'); x.className = 'x'; x.textContent = text;
+  li.append(t, x);
+  if (opts.pcm) {
+    const b = document.createElement('button'); b.textContent = '▶'; b.title = 'Volver a escuchar';
+    b.onclick = () => playPcm(opts.pcm);
+    li.append(b);
+  }
+  box.prepend(li);
+  while (box.children.length > 60) box.lastElementChild.remove();
+}
+
+/* ---------- ADPCM IMA (4 bits/muestra) ---------- */
+const STEP = [7,8,9,10,11,12,13,14,16,17,19,21,23,25,28,31,34,37,41,45,50,55,60,66,73,80,88,97,107,118,130,143,157,173,190,209,230,253,279,307,337,371,408,449,494,544,598,658,724,796,876,963,1060,1166,1282,1411,1552,1707,1878,2066,2272,2499,2749,3024,3327,3660,4026,4428,4871,5358,5894,6484,7132,7845,8630,9493,10442,11487,12635,13899,15289,16818,18500,20350,22385,24623,27086,29794,32767];
+const IDX = [-1,-1,-1,-1,2,4,6,8];
+function adpcmEnc(pcm, st) {
+  const out = new Uint8Array(pcm.length >> 1);
+  let p = st.p, ix = st.i;
+  for (let n = 0; n < pcm.length; n++) {
+    let step = STEP[ix], diff = pcm[n] - p, code = 0;
+    if (diff < 0) { code = 8; diff = -diff; }
+    let vp = step >> 3;
+    if (diff >= step) { code |= 4; diff -= step; vp += step; }
+    step >>= 1; if (diff >= step) { code |= 2; diff -= step; vp += step; }
+    step >>= 1; if (diff >= step) { code |= 1; vp += step; }
+    p += (code & 8) ? -vp : vp;
+    if (p > 32767) p = 32767; else if (p < -32768) p = -32768;
+    ix += IDX[code & 7]; if (ix < 0) ix = 0; else if (ix > 88) ix = 88;
+    if (n & 1) out[n >> 1] |= code << 4; else out[n >> 1] = code;
+  }
+  st.p = p; st.i = ix;
+  return out;
+}
+function adpcmDec(data, p, ix) {
+  const out = new Int16Array(data.length * 2);
+  for (let n = 0; n < out.length; n++) {
+    const code = (n & 1) ? data[n >> 1] >> 4 : data[n >> 1] & 15;
+    const step = STEP[ix];
+    let vp = step >> 3;
+    if (code & 4) vp += step;
+    if (code & 2) vp += step >> 1;
+    if (code & 1) vp += step >> 2;
+    p += (code & 8) ? -vp : vp;
+    if (p > 32767) p = 32767; else if (p < -32768) p = -32768;
+    ix += IDX[code & 7]; if (ix < 0) ix = 0; else if (ix > 88) ix = 88;
+    out[n] = p;
+  }
+  return out;
+}
+
+/* ---------- cliente MQTT 3.1.1 mínimo sobre WebSocket ---------- */
+function mqttStr(s) { const b = te.encode(s); return cat([[b.length >> 8, b.length & 255], b]); }
+function mqttPkt(type, body) {
+  const len = []; let n = body.length;
+  do { let d = n % 128; n = Math.floor(n / 128); if (n) d |= 128; len.push(d); } while (n);
+  return cat([[type], len, body]);
+}
+function Mqtt(url, topic, will, onmsg, onstate) {
+  let ws, buf = new Uint8Array(0), ping, retry, closed = false, up = false;
+  const setUp = v => { if (up !== v) { up = v; onstate(v); } };
+  function open() {
+    try { ws = new WebSocket(url, 'mqtt'); } catch { retry = setTimeout(open, 5000); return; }
+    ws.binaryType = 'arraybuffer';
+    buf = new Uint8Array(0);
+    ws.onopen = () => {
+      const cid = 'onda' + hex(crypto.getRandomValues(new Uint8Array(8)));
+      const parts = [mqttStr('MQTT'), [4, 0x02 | (will ? 0x04 : 0)], [0, 30], mqttStr(cid)];
+      if (will) parts.push(mqttStr(topic), [will.length >> 8, will.length & 255], will);
+      ws.send(mqttPkt(0x10, cat(parts)));
+    };
+    ws.onmessage = e => { buf = cat([buf, new Uint8Array(e.data)]); parse(); };
+    ws.onerror = () => {};
+    ws.onclose = () => {
+      setUp(false); clearInterval(ping);
+      if (!closed) retry = setTimeout(open, 2500);
+    };
+  }
+  function parse() {
+    for (;;) {
+      if (buf.length < 2) return;
+      let i = 1, mul = 1, len = 0, d;
+      do { if (i >= buf.length) return; d = buf[i++]; len += (d & 127) * mul; mul *= 128; } while (d & 128);
+      if (buf.length < i + len) return;
+      const h = buf[0], body = buf.slice(i, i + len);
+      buf = buf.slice(i + len);
+      const type = h >> 4;
+      if (type === 2) {                                   // CONNACK
+        if (body[1] !== 0) { ws.close(); return; }
+        ws.send(mqttPkt(0x82, cat([[0, 1], mqttStr(topic), [0]])));
+        clearInterval(ping);
+        ping = setInterval(() => { if (ws.readyState === 1) ws.send(new Uint8Array([0xC0, 0])); }, 20000);
+      } else if (type === 9) {                            // SUBACK
+        setUp(true);
+      } else if (type === 3) {                            // PUBLISH
+        let off = 2 + ((body[0] << 8) | body[1]);
+        if ((h >> 1) & 3) off += 2;
+        onmsg(body.subarray(off));
+      }
+    }
+  }
+  open();
+  return {
+    get up() { return up; },
+    publish(payload) {
+      if (up && ws.readyState === 1 && ws.bufferedAmount < 200000)
+        ws.send(mqttPkt(0x30, cat([mqttStr(topic), payload])));
+    },
+    close() {
+      closed = true; clearTimeout(retry); clearInterval(ping);
+      try { if (ws.readyState === 1) ws.send(new Uint8Array([0xE0, 0])); ws.close(); } catch {}
+      setUp(false);
+    }
+  };
+}
+
+/* ---------- cifrado ---------- */
+async function deriveKeys(chan) {
+  const base = await crypto.subtle.importKey('raw', te.encode(chan), 'PBKDF2', false, ['deriveBits']);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: te.encode('onda-walkie-v1'), iterations: 150000 }, base, 384));
+  const key = await crypto.subtle.importKey('raw', bits.slice(0, 32), 'AES-GCM', false, ['encrypt', 'decrypt']);
+  return { key, topic: 'onda1/' + hex(bits.slice(32, 48)) };
+}
+async function seal(plain) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, S.key, plain));
+  return cat([iv, ct]);
+}
+const ctlBytes = obj => cat([[0], te.encode(JSON.stringify(obj))]);
+
+/* ---------- estado ---------- */
+const S = {
+  joined: false, key: null, topic: '', chan: '', nick: '',
+  id: null, idHex: '',
+  clients: [], peers: new Map(),
+  ctx: null, master: null, mic: null, cap: null, micOk: false,
+  tx: false, txId: 0, seq: 0, enc: null, own: [], txTimer: 0, txStart: 0,
+  timers: [], wake: null
+};
+const seen = new Set(), seenQ = [];
+
+/* ---------- audio: salida ---------- */
+const WORKLET = `
+class Cap extends AudioWorkletProcessor{
+  constructor(){super();this.on=false;this.buf=new Int16Array(${FRAME});this.n=0;this.acc=0;this.cnt=0;this.pos=0;
+    this.ratio=sampleRate/${RATE};this.pk=0;this.pc=0;
+    this.port.onmessage=e=>{
+      if(e.data.on){this.on=true;this.n=0;this.acc=0;this.cnt=0;this.pos=0;}
+      else if(this.on){this.on=false;if(this.n){this.buf.fill(0,this.n);this.flush();}this.port.postMessage({end:1});}
+    };}
+  flush(){const b=this.buf.slice();this.port.postMessage({pcm:b},[b.buffer]);this.n=0;}
+  process(inputs){
+    const ch=inputs[0]&&inputs[0][0];if(!ch)return true;
+    for(let i=0;i<ch.length;i++){
+      const s=ch[i],a=s<0?-s:s;if(a>this.pk)this.pk=a;
+      if(this.on){this.acc+=s;this.cnt++;this.pos++;
+        if(this.pos>=this.ratio){this.pos-=this.ratio;let v=this.acc/this.cnt;this.acc=0;this.cnt=0;
+          v=v>1?1:v<-1?-1:v;this.buf[this.n++]=v*32767;if(this.n===${FRAME})this.flush();}}
+    }
+    this.pc+=ch.length;if(this.pc>=sampleRate/15){this.port.postMessage({lvl:this.pk});this.pk=0;this.pc=0;}
+    return true;}
+}
+registerProcessor('cap',Cap);`;
+
+function upsample(pcm, prev) {            // 16 kHz -> frecuencia del contexto, interpolación lineal
+  const ratio = S.ctx.sampleRate / RATE;
+  const n = Math.round(pcm.length * ratio);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i + 1) / ratio - 1, j = Math.floor(x), f = x - j;
+    const a = j < 0 ? prev : pcm[j], b = j + 1 < pcm.length ? pcm[j + 1] : pcm[pcm.length - 1];
+    out[i] = (a + (b - a) * f) / 32768;
+  }
+  return out;
+}
+function playAt(pcm, when, prev) {
+  const f = upsample(pcm, prev || 0);
+  const buf = S.ctx.createBuffer(1, f.length, S.ctx.sampleRate);
+  buf.getChannelData(0).set(f);
+  const src = S.ctx.createBufferSource();
+  src.buffer = buf; src.connect(S.master); src.start(when);
+}
+function playPcm(pcm) {
+  if (!S.ctx) return;
+  S.ctx.resume();
+  playAt(pcm, S.ctx.currentTime + 0.05, 0);
+}
+function beep(freqs, when) {
+  if (!S.ctx || !$('beepTgl').checked) return;
+  let t = Math.max(when || 0, S.ctx.currentTime);
+  for (const f of freqs) {
+    const o = S.ctx.createOscillator(), g = S.ctx.createGain();
+    o.frequency.value = f; o.type = 'sine';
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.18, t + 0.01);
+    g.gain.setValueAtTime(0.18, t + 0.06);
+    g.gain.linearRampToValueAtTime(0, t + 0.08);
+    o.connect(g).connect(S.master); o.start(t); o.stop(t + 0.09);
+    t += 0.09;
+  }
+}
+async function initAudio() {
+  if (!S.ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    S.ctx = new AC({ latencyHint: 'interactive' });
+    const lp = S.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7000;
+    S.master = S.ctx.createGain(); S.master.gain.value = +$('vol').value;
+    S.master.connect(lp).connect(S.ctx.destination);
+    S.ctx.onstatechange = checkAudio;
+  }
+  await S.ctx.resume().catch(() => {});
+}
+function checkAudio() {
+  $('audioBanner').hidden = !(S.joined && S.ctx && S.ctx.state !== 'running');
+}
+async function initMic() {
+  S.micOk = false;
+  try {
+    if (!navigator.mediaDevices || !S.ctx.audioWorklet) throw new Error('navegador sin soporte de micrófono');
+    S.mic = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+    });
+    const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+    await S.ctx.audioWorklet.addModule(url);
+    URL.revokeObjectURL(url);
+    const srcNode = S.ctx.createMediaStreamSource(S.mic);
+    S.cap = new AudioWorkletNode(S.ctx, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1 });
+    const mute = S.ctx.createGain(); mute.gain.value = 0;
+    srcNode.connect(S.cap).connect(mute).connect(S.ctx.destination);
+    S.cap.port.onmessage = onCap;
+    S.micOk = true;
+  } catch (e) {
+    log('Sin micrófono: solo escucha (' + (e.message || e.name) + ')', { cls: 'err' });
+  }
+}
+
+/* ---------- transmisión ---------- */
+function onCap(e) {
+  const d = e.data;
+  if (d.lvl !== undefined) { if (S.tx) meter(d.lvl); return; }
+  if (d.pcm) { sendFrame(d.pcm, 0); return; }
+  if (d.end) {
+    sendFrame(null, 1);
+    const secs = S.own.length * FRAME_S;
+    if (S.own.length) {
+      const all = new Int16Array(S.own.length * FRAME);
+      S.own.forEach((c, i) => all.set(c, i * FRAME));
+      log('TÚ · ' + secs.toFixed(1) + ' s', { pcm: all });
+    }
+    S.own = [];
+  }
+}
+function sendFrame(pcm, last) {
+  const head = new Uint8Array(12);
+  head[0] = 1; head.set(S.id, 1);
+  head[5] = S.txId; head[6] = S.seq >> 8; head[7] = S.seq & 255;
+  head[8] = (S.enc.p >> 8) & 255; head[9] = S.enc.p & 255; head[10] = S.enc.i; head[11] = last;
+  let body = new Uint8Array(0);
+  if (pcm) { body = adpcmEnc(pcm, S.enc); S.own.push(pcm); S.seq++; }
+  publish(cat([head, body]));
+}
+async function publish(plain) {
+  if (!S.joined) return;
+  const msg = await seal(plain);
+  for (const c of S.clients) c.publish(msg);
+}
+function startTx() {
+  if (!S.joined || !S.micOk || S.tx) return;
+  if (!S.clients.some(c => c.up)) { log('Sin conexión: no se puede transmitir', { cls: 'err' }); return; }
+  S.ctx.resume();
+  S.tx = true; S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 }; S.own = [];
+  S.cap.port.postMessage({ on: 1 });
+  beep([1200]);
+  if (navigator.vibrate) navigator.vibrate(25);
+  clearTimeout(S.txTimer);
+  S.txTimer = setTimeout(() => { log('Corte automático a los ' + MAX_TX_S + ' s'); stopTx(); }, MAX_TX_S * 1000);
+  render();
+}
+function stopTx() {
+  if (!S.tx) return;
+  S.tx = false; clearTimeout(S.txTimer);
+  S.cap.port.postMessage({ on: 0 });
+  meter(0);
+  render();
+}
+
+/* ---------- recepción ---------- */
+async function onMsg(data) {
+  if (!S.joined || data.length < 29) return;
+  const k = String.fromCharCode.apply(null, data.subarray(0, 12));
+  if (seen.has(k)) return;                      // el mismo paquete llega por varios brokers
+  seen.add(k); seenQ.push(k); if (seenQ.length > 800) seen.delete(seenQ.shift());
+  let pt;
+  try {
+    pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: data.slice(0, 12) }, S.key, data.slice(12)));
+  } catch { return; }
+  if (!S.joined) return;
+  if (pt[0] === 0) { try { onCtl(JSON.parse(td.decode(pt.subarray(1)))); } catch {} }
+  else if (pt[0] === 1 && pt.length >= 12) onAudio(pt);
+}
+function peerOf(id, nick) {
+  let p = S.peers.get(id);
+  if (!p) {
+    p = { id, nick: nick || '···', last: 0, rx: null, doneTx: -1, talk: false, tmo: 0 };
+    S.peers.set(id, p);
+    if (nick) log(nick + ' entra en el canal');
+    render();
+  } else if (nick && p.nick !== nick) {
+    if (p.nick === '···') log(nick + ' entra en el canal');
+    p.nick = nick; render();
+  }
+  p.last = Date.now();
+  return p;
+}
+function onCtl(m) {
+  if (!m || typeof m.id !== 'string' || m.id === S.idHex || !/^[0-9a-f]{8}$/.test(m.id)) return;
+  const nick = String(m.nick || '').slice(0, 14) || '···';
+  if (m.t === 'bye') {
+    const p = S.peers.get(m.id);
+    if (p) dropPeer(p, 'sale del canal');
+    return;
+  }
+  if (m.t !== 'here' && m.t !== 'hello') return;
+  peerOf(m.id, nick);
+  if (m.t === 'hello') setTimeout(sendHere, 100 + Math.random() * 400);
+}
+function dropPeer(p, why) {
+  if (p.rx) finishRx(p);
+  clearTimeout(p.tmo);
+  S.peers.delete(p.id);
+  log(p.nick + ' ' + why);
+  render();
+}
+function onAudio(pt) {
+  const id = hex(pt.subarray(1, 5));
+  if (id === S.idHex) return;
+  const p = peerOf(id);
+  const tx = pt[5], seq = (pt[6] << 8) | pt[7], last = pt[11] & 1;
+  if (tx === p.doneTx) return;
+  let st = p.rx;
+  if (st && st.tx !== tx) { finishRx(p); st = null; }
+  if (!st) st = p.rx = { tx, base: null, chunks: [], max: -1, endAt: 0, prev: 0 };
+  if (pt.length > 12) {
+    const pcm = adpcmDec(pt.subarray(12), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
+    const now = S.ctx.currentTime;
+    if (st.base === null) st.base = now + JITTER_S - seq * FRAME_S;
+    let when = st.base + seq * FRAME_S;
+    if (when < now + 0.01 && seq > st.max) { st.base = now + JITTER_S - seq * FRAME_S; when = st.base + seq * FRAME_S; }
+    if (when >= now + 0.01 && !st.chunks[seq]) {
+      playAt(pcm, when, seq === st.max + 1 ? st.prev : 0);
+      st.endAt = Math.max(st.endAt, when + FRAME_S);
+    }
+    if (!st.chunks[seq]) st.chunks[seq] = pcm;
+    if (seq > st.max) { st.max = seq; st.prev = pcm[pcm.length - 1]; }
+    let pk = 0; for (let i = 0; i < pcm.length; i += 16) { const a = Math.abs(pcm[i]); if (a > pk) pk = a; }
+    if (!S.tx) meter(pk / 32768);
+  }
+  if (!p.talk) { p.talk = true; render(); }
+  clearTimeout(p.tmo);
+  if (last) finishRx(p);
+  else p.tmo = setTimeout(() => finishRx(p), 900);
+}
+function finishRx(p) {
+  const st = p.rx; if (!st) return;
+  p.rx = null; p.doneTx = st.tx;
+  clearTimeout(p.tmo);
+  setTimeout(() => { if (p.doneTx === st.tx) p.doneTx = -1; }, 3000);
+  const n = st.max + 1;
+  if (n > 0) {
+    const all = new Int16Array(n * FRAME);
+    for (let i = 0; i < n; i++) if (st.chunks[i]) all.set(st.chunks[i], i * FRAME);
+    log(p.nick + ' · ' + (n * FRAME_S).toFixed(1) + ' s', { pcm: all });
+    beep([900, 600], st.endAt + 0.03);
+  }
+  const wait = Math.max(0, (st.endAt - S.ctx.currentTime) * 1000);
+  setTimeout(() => { if (!p.rx) { p.talk = false; if (!S.tx) meter(0); render(); } }, wait);
+}
+
+/* ---------- presencia ---------- */
+const sendHere = () => publish(ctlBytes({ t: 'here', id: S.idHex, nick: S.nick }));
+function sweep() {
+  const now = Date.now();
+  for (const p of [...S.peers.values()]) if (now - p.last > 14000 && !p.rx) dropPeer(p, 'se ha ido (sin señal)');
+}
+
+/* ---------- interfaz ---------- */
+function meter(v) { $('meterFill').style.width = Math.min(100, Math.sqrt(v) * 110) + '%'; }
+function render() {
+  const st = $('state'), ptt = $('ptt');
+  const up = S.clients.filter(c => c.up).length;
+  const talkers = [...S.peers.values()].filter(p => p.talk);
+  st.className = 'state';
+  if (!S.joined) st.textContent = 'desconectado';
+  else if (S.tx) { st.textContent = '● transmitiendo'; st.classList.add('tx'); }
+  else if (talkers.length) { st.textContent = '◉ ' + talkers.map(p => p.nick).join(', '); st.classList.add('rx'); }
+  else if (up) { st.textContent = 'en línea · ' + up + '/' + S.clients.length; st.classList.add('on'); }
+  else st.textContent = 'conectando…';
+  if (!S.joined) return;
+
+  ptt.classList.toggle('tx', S.tx);
+  ptt.classList.toggle('rx', !S.tx && talkers.length > 0);
+  ptt.disabled = !S.micOk;
+  const lock = $('lockTgl').checked;
+  $('pttLbl').textContent = !S.micOk ? 'SOLO ESCUCHA' : S.tx ? 'HABLANDO' : talkers.length ? talkers[0].nick : lock ? 'TOCA PARA HABLAR' : 'MANTÉN PARA HABLAR';
+  $('pttSub').textContent = !S.micOk ? 'micrófono no disponible' : S.tx ? (lock ? 'toca para soltar' : 'suelta para escuchar') : talkers.length ? 'recibiendo…' : 'o la barra espaciadora';
+
+  const box = $('peers'); box.textContent = '';
+  const me = document.createElement('div'); me.className = 'peer me' + (S.tx ? ' talk' : ''); me.textContent = S.nick + ' (tú)';
+  box.append(me);
+  for (const p of S.peers.values()) {
+    const el = document.createElement('div'); el.className = 'peer' + (p.talk ? ' talk' : ''); el.textContent = p.nick;
+    box.append(el);
+  }
+  if (!S.peers.size) {
+    const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'nadie más en el canal · pulsa «invitar»';
+    box.append(e);
+  }
+}
+function updCount() {
+  const el = $('chan'); const v = cleanKey(el.value); if (v !== el.value) el.value = v;
+  const c = $('chanCount');
+  c.textContent = v.length + ' / 20 · mínimo 10';
+  c.className = 'cnt ' + (v.length >= 10 ? 'ok' : v.length ? 'bad' : '');
+}
+const inviteUrl = () => location.origin + location.pathname + location.search + '#' + S.chan;
+
+async function join() {
+  const chan = cleanKey($('chan').value);
+  if (chan.length < 10) { updCount(); $('chan').focus(); return; }
+  if (!window.crypto || !crypto.subtle) { log('Hace falta HTTPS para cifrar. Abre la página por https://', { cls: 'err' }); return; }
+  const btn = $('joinBtn'); btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    S.nick = ($('nick').value.trim().toUpperCase().slice(0, 14)) || 'ONDA-' + (100 + Math.floor(Math.random() * 900));
+    $('nick').value = S.nick;
+    store.set('onda.nick', S.nick); store.set('onda.chan', chan);
+    await initAudio();
+    if (!S.cap) await initMic(); else S.micOk = true;
+    const k = await deriveKeys(chan);
+    S.key = k.key; S.topic = k.topic; S.chan = chan;
+    S.id = crypto.getRandomValues(new Uint8Array(4)); S.idHex = hex(S.id);
+    S.txId = crypto.getRandomValues(new Uint8Array(1))[0];
+    S.peers.clear(); S.joined = true;
+    const will = await seal(ctlBytes({ t: 'bye', id: S.idHex, nick: S.nick }));
+    S.clients = BROKERS.map(u => Mqtt(u, S.topic, will, onMsg, upNow => {
+      if (upNow && S.joined) publish(ctlBytes({ t: 'hello', id: S.idHex, nick: S.nick }));
+      render();
+    }));
+    S.timers = [setInterval(sendHere, 4000), setInterval(sweep, 2000)];
+    $('chanName').textContent = chan;
+    $('joinPanel').hidden = true; $('radioPanel').hidden = false;
+    try { history.replaceState(null, '', '#' + chan); } catch {}
+    log('En el canal ' + chan + ' como ' + S.nick);
+    wakeLock(); checkAudio(); render();
+  } catch (e) {
+    log('No se pudo entrar: ' + (e.message || e), { cls: 'err' });
+    S.joined = false;
+  }
+  btn.disabled = false; btn.textContent = 'Entrar en el canal';
+}
+async function leave() {
+  if (!S.joined) return;
+  stopTx();
+  try { await publish(ctlBytes({ t: 'bye', id: S.idHex, nick: S.nick })); } catch {}
+  S.joined = false;
+  S.timers.forEach(clearInterval); S.timers = [];
+  const cl = S.clients; S.clients = [];
+  setTimeout(() => cl.forEach(c => c.close()), 150);
+  for (const p of S.peers.values()) clearTimeout(p.tmo);
+  S.peers.clear();
+  if (S.wake) { try { S.wake.release(); } catch {} S.wake = null; }
+  $('radioPanel').hidden = true; $('joinPanel').hidden = false; $('audioBanner').hidden = true;
+  meter(0); log('Has salido del canal'); render();
+}
+async function wakeLock() {
+  try { if (navigator.wakeLock && S.joined) S.wake = await navigator.wakeLock.request('screen'); } catch {}
+}
+
+/* ---------- eventos ---------- */
+$('chan').addEventListener('input', updCount);
+$('newChan').onclick = () => { $('chan').value = randomKey(16); updCount(); };
+$('joinBtn').onclick = join;
+$('nick').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+$('chan').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+$('leaveBtn').onclick = leave;
+$('copyBtn').onclick = async () => {
+  const url = inviteUrl();
+  try {
+    if (navigator.share) await navigator.share({ title: 'ONDA', text: 'Entra en mi canal de ONDA', url });
+    else { await navigator.clipboard.writeText(url); log('Enlace del canal copiado'); }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+    try { await navigator.clipboard.writeText(url); log('Enlace del canal copiado'); }
+    catch { window.prompt('Copia el enlace del canal:', url); }
+  }
+};
+$('vol').oninput = e => { if (S.master) S.master.gain.value = +e.target.value; };
+$('lockTgl').onchange = () => { stopTx(); render(); };
+$('audioBtn').onclick = () => S.ctx && S.ctx.resume().then(checkAudio);
+
+const ptt = $('ptt');
+ptt.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if ($('lockTgl').checked) { S.tx ? stopTx() : startTx(); return; }
+  try { ptt.setPointerCapture(e.pointerId); } catch {}
+  startTx();
+});
+const release = () => { if (!$('lockTgl').checked) stopTx(); };
+ptt.addEventListener('pointerup', release);
+ptt.addEventListener('pointercancel', release);
+ptt.addEventListener('lostpointercapture', release);
+ptt.addEventListener('contextmenu', e => e.preventDefault());
+ptt.addEventListener('click', e => e.preventDefault());
+
+const typing = e => /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox' && e.target.type !== 'range';
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' || !S.joined || typing(e)) return;
+  e.preventDefault();
+  if (e.repeat) return;
+  if ($('lockTgl').checked) S.tx ? stopTx() : startTx(); else startTx();
+});
+document.addEventListener('keyup', e => {
+  if (e.code !== 'Space' || !S.joined || typing(e)) return;
+  e.preventDefault(); release();
+});
+window.addEventListener('blur', release);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { wakeLock(); if (S.joined) sendHere(); }
+});
+window.addEventListener('pagehide', () => {
+  if (S.joined) S.clients.forEach(c => c.close());   // los demás reciben el «bye» del testamento MQTT
+});
+
+/* ---------- arranque ---------- */
+const fromHash = cleanKey(decodeURIComponent(location.hash.slice(1)));
+$('chan').value = fromHash || store.get('onda.chan') || randomKey(16);
+$('nick').value = store.get('onda.nick') || '';
+updCount();
+render();
+window.__onda = S;
+})();
+</script>
 </body>
 </html>
