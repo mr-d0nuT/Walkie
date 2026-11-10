@@ -183,8 +183,19 @@ input[type=text]:focus{border-color:var(--red)}
 .toast .tb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:11.5px;line-height:1.25}
 .toast .tb b{font-size:13.5px;letter-spacing:.02em}
 .toast .tb .alias{font-size:16px;font-weight:800;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.toast .tb a,.toast .tb button.undo{pointer-events:auto;color:#fff;font-weight:700}
-.toast .tb button.undo{align-self:flex-start;background:#ffffff33;border:0;border-radius:8px;padding:5px 10px;font-size:12px;margin-top:3px;cursor:pointer}
+.toasts{width:min(340px,calc(100vw - 16px))}
+.toast{flex-direction:column;align-items:stretch;gap:7px;padding:7px}
+.trow{display:flex;gap:8px;align-items:center}
+.tact{display:flex;gap:6px}
+.mapbtn{pointer-events:auto;flex:1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;border-radius:12px;background:#fff;color:#16181c;font-weight:800;font-size:17px;text-decoration:none;box-shadow:0 2px 6px #0004;-webkit-tap-highlight-color:transparent}
+.mapbtn:active{transform:scale(.98)}
+.mapbtn .mi{font-size:27px;line-height:1}
+.toast .undo{pointer-events:auto;min-height:54px;padding:0 14px;border:0;border-radius:12px;background:#ffffff38;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.toast.mini{padding:5px 7px}
+.toast.mini .map,.toast.mini .tact,.toast.mini .tb>span:not(.alias){display:none}
+.toast.mini .tb{flex-direction:row;align-items:center;gap:8px}
+.toast.mini .tb .alias{font-size:13px}
+.toast.mini .x{width:26px;height:26px;font-size:15px}
 .toast .x{pointer-events:auto;align-self:flex-start;flex:none;width:32px;height:32px;border-radius:50%;border:0;background:#ffffff2e;color:#fff;font-size:18px;line-height:1;cursor:pointer}
 /* hoja de invitación */
 .sheet{position:fixed;inset:0;z-index:80;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -342,7 +353,7 @@ const isDesktop = () => matchMedia('(min-width:840px)').matches;
 /* ---------- idiomas (ES / CA) ---------- */
 const I = {
   es: {
-    offline_banner: 'Sin conexión · reintentando…',
+    offline_banner: 'Sin conexión · reintentando…', ms_on: 'Escuchando el canal',
     out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
     out_spk_ios: 'Altavoz: volumen reforzado. Para sacar el audio por el altavoz el iPhone necesita iOS 16.4 o superior.',
     out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (modo llamada). Pega el móvil a la oreja.',
@@ -361,7 +372,7 @@ const I = {
     n_pol: 'PRESENCIA POLICIAL', n_alt: 'ALTERCADO', n_sos: 'SOS', n_loc: 'UBICACIÓN',
     cancel_n: '✕ Cancelar · {0}', locating: 'Ubicando…', sent_to: 'Enviado a {0}', sent_none: 'Enviado · nadie más conectado ahora',
     sent_q: 'Sin cobertura: saldrá al volver', undo: 'Anular', cleared: '{0} ha anulado su aviso', cleared_me: 'Has anulado tu aviso',
-    noloc: 'sin ubicación', acc: '±{0} m', open_map: 'abrir mapa', see_map: 'ver mapa', ago: 'hace {0} min', just_now: 'ahora', close: 'Cerrar', nearby: 'aquí al lado',
+    noloc: 'sin ubicación', acc: '±{0} m', open_map: 'Abrir mapa', see_map: 'ver mapa', ago: 'hace {0} min', just_now: 'ahora', close: 'Cerrar', nearby: 'aquí al lado',
     chat_title: 'Chat del canal', chat_ph: 'Escribe un mensaje…', chat_empty: 'Entra en un canal para hablar y chatear.',
     q1: '👍 Todo bien', q2: '🏃 Voy para allá', q3: '🙋 Necesito relevo', q4: '💧 Falta agua', q5: '📣 Venid al piquete',
     tab_radio: 'Radio', tab_chat: 'Chat',
@@ -373,7 +384,7 @@ const I = {
     offline_tx: 'Sin conexión: no se puede transmitir', cut: 'Corte automático a los {0} s', wait: 'Espera unos segundos antes de repetir el aviso'
   },
   ca: {
-    offline_banner: 'Sense connexió · reintentant…',
+    offline_banner: 'Sense connexió · reintentant…', ms_on: 'Escoltant el canal',
     out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
     out_spk_ios: 'Altaveu: volum reforçat. Per treure l\'àudio per l\'altaveu l\'iPhone necessita iOS 16.4 o superior.',
     out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (mode trucada). Enganxa el mòbil a l\'orella.',
@@ -392,7 +403,7 @@ const I = {
     n_pol: 'PRESÈNCIA POLICIAL', n_alt: 'ALDARULL', n_sos: 'SOS', n_loc: 'UBICACIÓ',
     cancel_n: '✕ Cancel·la · {0}', locating: 'Ubicant…', sent_to: 'Enviat a {0}', sent_none: 'Enviat · ningú més connectat ara',
     sent_q: 'Sense cobertura: sortirà en tornar', undo: 'Anul·la', cleared: '{0} ha anul·lat el seu avís', cleared_me: 'Has anul·lat el teu avís',
-    noloc: 'sense ubicació', acc: '±{0} m', open_map: 'obre el mapa', see_map: 'veure mapa', ago: 'fa {0} min', just_now: 'ara', close: 'Tanca', nearby: 'aquí al costat',
+    noloc: 'sense ubicació', acc: '±{0} m', open_map: 'Obre el mapa', see_map: 'veure mapa', ago: 'fa {0} min', just_now: 'ara', close: 'Tanca', nearby: 'aquí al costat',
     chat_title: 'Xat del canal', chat_ph: 'Escriu un missatge…', chat_empty: 'Entra en un canal per parlar i xatejar.',
     q1: '👍 Tot bé', q2: '🏃 Vinc cap allà', q3: '🙋 Necessito relleu', q4: '💧 Falta aigua', q5: '📣 Veniu al piquet',
     tab_radio: 'Ràdio', tab_chat: 'Xat',
@@ -568,7 +579,7 @@ const S = {
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
   out: 'spk', boost: null, comp: null, lp: null,
-  skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0
+  skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0, ka: null
 };
 const seen = new Set(), seenQ = [];
 const now = () => Date.now() + S.skew;      // hora corregida con la del servidor, por si el reloj del móvil está mal
@@ -706,6 +717,8 @@ async function initAudio() {
     S.comp = S.ctx.createDynamicsCompressor();                      // evita que el refuerzo sature
     S.comp.threshold.value = -14; S.comp.knee.value = 12; S.comp.attack.value = 0.003; S.comp.release.value = 0.2;
     S.lp = lp;
+    S.ka = S.ctx.createGain(); S.ka.gain.value = 0;                 // tono inaudible (25 Hz, muy bajo): la pestaña cuenta como «sonando» y el sistema no la duerme
+    const ko = S.ctx.createOscillator(); ko.frequency.value = 25; ko.connect(S.ka).connect(lp); ko.start();
     S.master.connect(S.boost).connect(S.comp).connect(lp).connect(S.ctx.destination);
     S.ctx.onstatechange = () => { checkAudio(); if (S.ctx.state !== 'running' && S.joined) setTimeout(wakeAudio, 300); };
   }
@@ -713,10 +726,13 @@ async function initAudio() {
 }
 function wakeAudio() {                      // cualquier toque en la pantalla reactiva el audio si el navegador lo había dormido
   if (S.ctx && S.ctx.state !== 'running') S.ctx.resume().then(checkAudio).catch(() => {});
-  if (ear.el && ear.el.srcObject && ear.el.paused) ear.el.play().catch(() => {});
+  if (out.el && out.mode !== 'direct' && out.el.srcObject && out.el.paused) out.el.play().then(checkAudio, () => {});
 }
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, wakeAudio, { capture: true, passive: true }));
-function checkAudio() { $('audioBanner').hidden = !(S.joined && S.ctx && S.ctx.state !== 'running'); }
+function checkAudio() {
+  const elOff = out.mode !== 'direct' && out.el && out.el.paused;
+  $('audioBanner').hidden = !(S.joined && S.ctx && (S.ctx.state !== 'running' || elOff));
+}
 const MIC_OPTS = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } };
 const micEnable = on => { if (S.mic) S.mic.getAudioTracks().forEach(tr => { tr.enabled = on; }); };
 // Mientras el micrófono está abierto, Android/iOS ponen el audio en «modo llamada» y suena flojo por el auricular.
@@ -760,40 +776,66 @@ async function initMic() {
 }
 
 /* ---------- salida de audio: auricular / altavoz ---------- */
-// Android/Chrome reproduce el audio WebRTC como audio de llamada (auricular) y el de Web Audio como multimedia (altavoz).
-// Para el modo auricular se pasa la mezcla por un bucle WebRTC local y se reproduce en un <audio>.
-const ear = { pcA: null, pcB: null, el: null };
-async function earOn() {
-  if (ear.pcA) return true;
-  if (!window.RTCPeerConnection || !S.ctx.createMediaStreamDestination) return false;
-  const dest = S.ctx.createMediaStreamDestination();
-  const pcA = new RTCPeerConnection(), pcB = new RTCPeerConnection();
+// La mezcla no va directa al altavoz: pasa por un <audio>. Así el navegador la trata como «reproducción multimedia»
+// (igual que una radio online) y no congela la página cuando se apaga la pantalla.
+//   «el»  = <audio> directo  → canal multimedia (altavoz)
+//   «rtc» = bucle WebRTC local → Android lo reproduce como audio de llamada (auricular)
+const out = { mode: 'direct', dest: null, el: null, pcA: null, pcB: null, q: Promise.resolve() };
+function outEl() {
+  if (out.el) return out.el;
   const el = document.createElement('audio');
-  el.autoplay = true; el.playsInline = true; el.style.display = 'none'; document.body.append(el);
-  try {
-    pcA.onicecandidate = e => { if (e.candidate) pcB.addIceCandidate(e.candidate).catch(() => {}); };
-    pcB.onicecandidate = e => { if (e.candidate) pcA.addIceCandidate(e.candidate).catch(() => {}); };
-    pcB.ontrack = e => { el.srcObject = e.streams[0]; el.play().catch(() => {}); };
-    dest.stream.getAudioTracks().forEach(tr => pcA.addTrack(tr, dest.stream));
-    await pcA.setLocalDescription(await pcA.createOffer());
-    await pcB.setRemoteDescription(pcA.localDescription);
-    await pcB.setLocalDescription(await pcB.createAnswer());
-    await pcA.setRemoteDescription(pcB.localDescription);
-    S.lp.disconnect(); S.lp.connect(dest);
-    Object.assign(ear, { pcA, pcB, el });
-    return true;
-  } catch {
-    try { pcA.close(); pcB.close(); } catch {}
-    el.remove();
-    return false;
-  }
+  el.autoplay = true; el.playsInline = true; el.style.display = 'none';
+  el.addEventListener('pause', () => { if (S.joined && out.mode !== 'direct') setTimeout(() => el.play().catch(() => {}), 800); });   // p. ej. tras una llamada de teléfono
+  el.addEventListener('playing', checkAudio);
+  document.body.append(el); out.el = el;
+  return el;
 }
-function earOff() {
-  if (!ear.pcA) return;
+function rtcClose() { try { if (out.pcA) out.pcA.close(); if (out.pcB) out.pcB.close(); } catch {} out.pcA = out.pcB = null; }
+function toDirect() {
+  out.mode = 'direct';
+  rtcClose();
   try { S.lp.disconnect(); S.lp.connect(S.ctx.destination); } catch {}
-  try { ear.pcA.close(); ear.pcB.close(); } catch {}
-  try { ear.el.srcObject = null; ear.el.remove(); } catch {}
-  ear.pcA = ear.pcB = ear.el = null;
+  if (out.el) { try { out.el.pause(); } catch {} out.el.srcObject = null; }
+}
+function setRoute(mode) { out.q = out.q.then(() => doRoute(mode), () => doRoute(mode)); return out.q; }
+async function doRoute(mode) {
+  if (!S.ctx || !S.lp) return false;
+  if (mode !== 'direct' && !S.ctx.createMediaStreamDestination) mode = 'direct';
+  if (mode === 'rtc' && !window.RTCPeerConnection) return false;
+  if (mode === out.mode) { if (mode !== 'direct' && out.el && out.el.paused) out.el.play().then(checkAudio, checkAudio); return true; }
+  if (mode === 'direct') { toDirect(); return true; }
+  try {
+    if (!out.dest) out.dest = S.ctx.createMediaStreamDestination();
+    const el = outEl();
+    rtcClose();
+    if (mode === 'el') el.srcObject = out.dest.stream;
+    else {
+      const pcA = out.pcA = new RTCPeerConnection(), pcB = out.pcB = new RTCPeerConnection();
+      pcA.onicecandidate = e => { if (e.candidate) pcB.addIceCandidate(e.candidate).catch(() => {}); };
+      pcB.onicecandidate = e => { if (e.candidate) pcA.addIceCandidate(e.candidate).catch(() => {}); };
+      pcB.ontrack = e => { el.srcObject = e.streams[0]; el.play().then(checkAudio, checkAudio); };
+      out.dest.stream.getAudioTracks().forEach(tr => pcA.addTrack(tr, out.dest.stream));
+      await pcA.setLocalDescription(await pcA.createOffer());
+      await pcB.setRemoteDescription(pcA.localDescription);
+      await pcB.setLocalDescription(await pcB.createAnswer());
+      await pcA.setRemoteDescription(pcB.localDescription);
+    }
+    S.lp.disconnect(); S.lp.connect(out.dest);
+    out.mode = mode;
+    el.play().then(checkAudio, checkAudio);   // sin toque previo el navegador lo bloquea: sale el aviso y se reintenta al primer toque
+    return true;
+  } catch { toDirect(); return false; }
+}
+function mediaSess(on) {                    // ficha en la pantalla de bloqueo; los botones de pausa no detienen la escucha
+  if (!('mediaSession' in navigator)) return;
+  try {
+    if (on) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: 'Walkie-Talkie', artist: L('ms_on'),
+        artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
+      navigator.mediaSession.playbackState = 'playing';
+      for (const act of ['play', 'pause', 'stop']) navigator.mediaSession.setActionHandler(act, () => { if (out.el && out.mode !== 'direct') out.el.play().catch(() => {}); });
+    } else { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none'; }
+  } catch {}
 }
 // Los navegadores no tienen un interruptor estándar: se combinan tres técnicas y se informa de cuál ha funcionado.
 const SPK_RE = /speaker|altavoz|altaveu|loud|manos libres|hands.?free/i;
@@ -816,8 +858,9 @@ async function applyOutput(announce) {
     }
   } catch {}
   if (S.micOk && !S.tx) idleMic();
-  if (spk || picked || IOS) earOff();      // en iPhone el auricular lo da la sesión de audio, sin bucle WebRTC
-  else if (await earOn()) routed = true;
+  if (IOS || picked) await setRoute('direct');   // iPhone: la salida la decide la sesión de audio
+  else if (spk) await setRoute('el');
+  else if (await setRoute('rtc') && out.mode === 'rtc') routed = true;
   $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', spk);
   if (announce) log(L(spk ? (routed ? 'out_spk_ok' : (IOS ? 'out_spk_ios' : 'out_spk_lim')) : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
@@ -936,7 +979,7 @@ function onCtl(m) {
   }
   if (m.t === 'clear') {
     if (typeof m.aid !== 'string' || !/^[0-9a-f]{8}$/.test(m.aid)) return;
-    qsa('.toast[data-aid="' + m.aid + '"]').forEach(e => e.remove());
+    qsa('.toast[data-aid="' + m.aid + '"]').forEach(e => e.remove()); refreshToasts();
     qsa('.li.alert[data-aid="' + m.aid + '"]').forEach(e => e.classList.add('struck'));
     if (S.last && S.last.aid === m.aid) { S.last = null; renderLast(); }
     log(L('cleared', nick), {});
@@ -1042,9 +1085,19 @@ const AL = {
   loc: { ico: '📍', beep: [1000], ttl: 20000, delay: 0 }
 };
 const osmUrl = p => 'https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=17/' + p.lat + '/' + p.lon;
-function miniMap(p) {                       // miniatura centrada en el punto (teselas de OpenStreetMap)
+function setMapLink(a, p, label) {          // abre la app de mapas del móvil con un pin; en ordenador, OpenStreetMap
+  const ll = p.lat + ',' + p.lon, q = encodeURIComponent((label || '').replace(/[^\p{L}\p{N} ]/gu, '').trim() || ll);
+  if (IOS) a.href = 'https://maps.apple.com/?ll=' + ll + '&q=' + q;
+  else if (/Android/i.test(navigator.userAgent)) { a.href = 'geo:' + ll + '?q=' + ll + '(' + q + ')'; a.removeAttribute('target'); return; }
+  else a.href = osmUrl(p);
+  a.target = '_blank'; a.rel = 'noopener';
+}
+function refreshToasts() {                  // solo el aviso más reciente va desplegado; los anteriores quedan en una línea
+  Array.from($('toasts').children).forEach((e, i) => e.classList.toggle('mini', i > 0));
+}
+function miniMap(p, label) {                       // miniatura centrada en el punto (teselas de OpenStreetMap)
   const a = document.createElement('a');
-  a.className = 'map'; a.href = osmUrl(p); a.target = '_blank'; a.rel = 'noopener';
+  a.className = 'map'; setMapLink(a, p, label);
   const Z = 16, n = 256 * 2 ** Z, R = 30;
   const X = (p.lon + 180) / 360 * n;
   const r = p.lat * Math.PI / 180;
@@ -1069,7 +1122,7 @@ function renderLast() {                     // el último aviso recibido queda a
   const mins = Math.floor((Date.now() - a.t0) / 60000), me = freshPos();
   el.className = 'lastal ' + a.k;
   el.textContent = AL[a.k].ico + ' ' + L('al_' + a.k) + ' · ' + a.nick + ' · ' + (mins ? L('ago', mins) : L('just_now')) + (a.pos && me ? ' · ' + distText(me, a.pos) : '');
-  if (a.pos) el.href = osmUrl(a.pos); else el.removeAttribute('href');
+  if (a.pos) setMapLink(el, a.pos, L('n_' + a.k) + ' ' + a.nick); else el.removeAttribute('href');
 }
 function trimToasts() {
   const box = $('toasts');
@@ -1087,15 +1140,17 @@ function showAlert(k, nick, pos, mine, aid, ageMs, opts = {}) {
   if (aid) li.dataset.aid = aid;
   li.append(A.ico + ' ' + name + ' · ');
   const who = document.createElement('b'); who.textContent = mine ? L('you') : nick; li.append(who, ' · ' + hhmm + ago);
-  if (pos) { const l = document.createElement('a'); l.href = osmUrl(pos); l.target = '_blank'; l.rel = 'noopener'; l.textContent = L('see_map'); li.append(l); }
+  const label = name + (mine ? '' : ' ' + nick);
+  if (pos) { const l = document.createElement('a'); setMapLink(l, pos, label); l.textContent = L('see_map'); li.append(l); }
   else li.append(' · ' + L('noloc'));
   feedAdd(li, mine);
   if (!mine) { noteUnread(); S.last = { k, nick, pos, aid, t0: Date.now() - (ageMs || 0) }; renderLast(); }
   // ventana emergente (no bloquea el uso de la app)
   const t = document.createElement('div'); t.className = 'toast ' + k; t.setAttribute('role', 'alert');
   if (aid) t.dataset.aid = aid;
+  const close = () => { t.remove(); refreshToasts(); };
   let m;
-  if (pos) m = miniMap(pos);
+  if (pos) m = miniMap(pos, label);
   else { m = document.createElement('div'); m.className = 'map nomap'; m.textContent = L('noloc'); }
   const tb = document.createElement('div'); tb.className = 'tb';
   const b = document.createElement('b'); b.textContent = A.ico + ' ' + name;
@@ -1109,32 +1164,38 @@ function showAlert(k, nick, pos, mine, aid, ageMs, opts = {}) {
     tb.append(b, al, s1);
   }
   if (pos) {
-    const s2 = document.createElement('span');
-    const dl = document.createElement('span');
+    const s2 = document.createElement('span'), dl = document.createElement('span');
     if (!mine) {
       const me = freshPos();
       if (me) dl.textContent = distText(me, pos);
       else if (S.geoOk) getPos(120000, 6000).then(p => { if (p && dl.isConnected) dl.textContent = distText(p, pos); });
     }
-    s2.append(dl, ' ');
-    if (pos.acc != null) s2.append(L('acc', pos.acc) + ' · ');
-    const l = document.createElement('a'); l.href = osmUrl(pos); l.target = '_blank'; l.rel = 'noopener'; l.textContent = L('open_map');
-    s2.append(l); tb.append(s2);
+    s2.append(dl, ' ', pos.acc != null ? L('acc', pos.acc) : '');
+    tb.append(s2);
+  }
+  const x = document.createElement('button'); x.className = 'x'; x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', L('close'));
+  x.onclick = close;
+  const row = document.createElement('div'); row.className = 'trow'; row.append(m, tb, x);
+  const act = document.createElement('div'); act.className = 'tact';
+  if (pos) {                                // botón grande para abrir el mapa
+    const mb = document.createElement('a'); mb.className = 'mapbtn'; setMapLink(mb, pos, label);
+    const mi = document.createElement('span'); mi.className = 'mi'; mi.textContent = '🗺️';
+    mb.append(mi, L('open_map'));
+    act.append(mb);
   }
   if (mine && aid && k !== 'loc') {
     const u = document.createElement('button'); u.type = 'button'; u.className = 'undo'; u.textContent = L('undo');
     u.onclick = () => {
       sendCtl({ t: 'clear', id: S.idHex, nick: S.nick, aid }, {});
-      t.remove(); li.classList.add('struck'); log(L('cleared_me'), {});
+      close(); li.classList.add('struck'); log(L('cleared_me'), {});
     };
-    tb.append(u);
+    act.append(u);
   }
-  const x = document.createElement('button'); x.className = 'x'; x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', L('close'));
-  x.onclick = () => t.remove();
-  t.append(m, tb, x);
+  t.append(row);
+  if (act.children.length) t.append(act);
   $('toasts').prepend(t);
-  trimToasts();
-  if (A.ttl) setTimeout(() => t.remove(), A.ttl);
+  trimToasts(); refreshToasts();
+  if (A.ttl) setTimeout(close, A.ttl);
   if (!mine) {
     if (k === 'sos') {                      // el SOS suena tres veces y vibra fuerte
       const loud = () => { if (t.isConnected) { beep(A.beep, 0, 0.45); vibe([300, 120, 300, 120, 500]); } };
@@ -1298,6 +1359,7 @@ async function join() {
     log(L('in_chan', chan, S.nick), {});
     $('chatIn').disabled = false; $('chatSend').disabled = false;
     qsa('#quick button').forEach(b => { b.disabled = false; });
+    S.ka.gain.value = 0.003; mediaSess(true);
     wakeLock(); checkAudio(); render();
   } catch (e) {
     log(L('err_join', e.message || e), { cls: 'err' });
@@ -1316,7 +1378,7 @@ async function leave() {
   for (const p of S.peers.values()) clearTimeout(p.tmo);
   S.peers.clear(); S.outbox = [];
   if (S.wake) { try { S.wake.release(); } catch {} S.wake = null; }
-  closeMic(); earOff();
+  closeMic(); setRoute('direct'); mediaSess(false); if (S.ka) S.ka.gain.value = 0;
   $('radioPanel').hidden = true; $('joinPanel').hidden = false; $('audioBanner').hidden = true;
   $('app').classList.remove('in'); setTab('radio');
   $('chatIn').disabled = true; $('chatSend').disabled = true;
@@ -1425,7 +1487,7 @@ applyLang();
 const auto = +store.get('w.auto') || 0;
 if (auto && Date.now() - auto < 12 * 3600000 && store.get('w.chan') && (!hashKey || hashKey === store.get('w.chan'))) join();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__w = S; S.ear = ear;
+window.__w = S; S.ear = out;
 })();
 </script>
 </body>
