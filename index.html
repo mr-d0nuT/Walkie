@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="11N Walkie">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>11N Vaga General · Walkie-Talkie</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -52,6 +53,10 @@ button{touch-action:manipulation}
 .state.tx{color:#fff;background:var(--red);border-color:var(--red)}
 .state.rx{color:#fff;background:var(--dark);border-color:var(--dark)}
 .count{font-size:13px;font-weight:700;color:var(--mut);white-space:nowrap}
+.lastal{display:block;margin-top:10px;padding:10px 12px;border-radius:12px;color:#fff;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lastal.pol{background:#1d4ed8}.lastal.alt{background:#15181d}.lastal.sos{background:#d90429}.lastal.loc{background:#1a8f4d}
+:root[data-theme=dark] .lastal.alt{background:#000;box-shadow:inset 0 0 0 1.5px #555}
+.haslast .ptt{width:min(66vw,calc(100vh - 530px),300px);width:min(66vw,calc(100dvh - 530px),300px)}
 .outbtn{flex:none;min-height:38px;padding:7px 12px;font-size:13px}
 .outbtn.loud{background:var(--dark);border-color:var(--dark);color:#fff}
 .statusrow .state{flex:1}
@@ -235,6 +240,7 @@ input[type=text]:focus{border-color:var(--red)}
           </div>
         </div>
         <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div><button id="outBtn" class="mini outbtn" type="button" data-ti="out_title"></button></div>
+        <a id="lastAlert" class="lastal" hidden target="_blank" rel="noopener"></a>
         <div id="peers" class="peers"></div>
 
         <button id="ptt" class="ptt" type="button">
@@ -330,6 +336,7 @@ function randomKey(n) {
 }
 const cleanKey = s => s.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20);
 const vibe = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const isDesktop = () => matchMedia('(min-width:840px)').matches;
 
 /* ---------- idiomas (ES / CA) ---------- */
@@ -337,6 +344,7 @@ const I = {
   es: {
     offline_banner: 'Sin conexión · reintentando…',
     out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
+    out_spk_ios: 'Altavoz: volumen reforzado. Para sacar el audio por el altavoz el iPhone necesita iOS 16.4 o superior.',
     out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (modo llamada). Pega el móvil a la oreja.',
     out_spk_lim: 'Altavoz: el micrófono solo se abre al hablar y el volumen va reforzado. Sube el volumen de medios del móvil.',
     out_ear_lim: 'Auricular: modo llamada, suena más bajo. Usa el volumen de llamada del móvil.',
@@ -353,7 +361,7 @@ const I = {
     n_pol: 'PRESENCIA POLICIAL', n_alt: 'ALTERCADO', n_sos: 'SOS', n_loc: 'UBICACIÓN',
     cancel_n: '✕ Cancelar · {0}', locating: 'Ubicando…', sent_to: 'Enviado a {0}', sent_none: 'Enviado · nadie más conectado ahora',
     sent_q: 'Sin cobertura: saldrá al volver', undo: 'Anular', cleared: '{0} ha anulado su aviso', cleared_me: 'Has anulado tu aviso',
-    noloc: 'sin ubicación', acc: '±{0} m', open_map: 'abrir mapa', see_map: 'ver mapa', ago: 'hace {0} min', close: 'Cerrar', nearby: 'aquí al lado',
+    noloc: 'sin ubicación', acc: '±{0} m', open_map: 'abrir mapa', see_map: 'ver mapa', ago: 'hace {0} min', just_now: 'ahora', close: 'Cerrar', nearby: 'aquí al lado',
     chat_title: 'Chat del canal', chat_ph: 'Escribe un mensaje…', chat_empty: 'Entra en un canal para hablar y chatear.',
     q1: '👍 Todo bien', q2: '🏃 Voy para allá', q3: '🙋 Necesito relevo', q4: '💧 Falta agua', q5: '📣 Venid al piquete',
     tab_radio: 'Radio', tab_chat: 'Chat',
@@ -367,6 +375,7 @@ const I = {
   ca: {
     offline_banner: 'Sense connexió · reintentant…',
     out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
+    out_spk_ios: 'Altaveu: volum reforçat. Per treure l\'àudio per l\'altaveu l\'iPhone necessita iOS 16.4 o superior.',
     out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (mode trucada). Enganxa el mòbil a l\'orella.',
     out_spk_lim: 'Altaveu: el micròfon només s\'obre en parlar i el volum va reforçat. Puja el volum de multimèdia del mòbil.',
     out_ear_lim: 'Auricular: mode trucada, sona més baix. Fes servir el volum de trucada del mòbil.',
@@ -383,7 +392,7 @@ const I = {
     n_pol: 'PRESÈNCIA POLICIAL', n_alt: 'ALDARULL', n_sos: 'SOS', n_loc: 'UBICACIÓ',
     cancel_n: '✕ Cancel·la · {0}', locating: 'Ubicant…', sent_to: 'Enviat a {0}', sent_none: 'Enviat · ningú més connectat ara',
     sent_q: 'Sense cobertura: sortirà en tornar', undo: 'Anul·la', cleared: '{0} ha anul·lat el seu avís', cleared_me: 'Has anul·lat el teu avís',
-    noloc: 'sense ubicació', acc: '±{0} m', open_map: 'obre el mapa', see_map: 'veure mapa', ago: 'fa {0} min', close: 'Tanca', nearby: 'aquí al costat',
+    noloc: 'sense ubicació', acc: '±{0} m', open_map: 'obre el mapa', see_map: 'veure mapa', ago: 'fa {0} min', just_now: 'ara', close: 'Tanca', nearby: 'aquí al costat',
     chat_title: 'Xat del canal', chat_ph: 'Escriu un missatge…', chat_empty: 'Entra en un canal per parlar i xatejar.',
     q1: '👍 Tot bé', q2: '🏃 Vinc cap allà', q3: '🙋 Necessito relleu', q4: '💧 Falta aigua', q5: '📣 Veniu al piquet',
     tab_radio: 'Ràdio', tab_chat: 'Xat',
@@ -466,13 +475,13 @@ function mqttPkt(type, body) {
   return cat([[type], len, body]);
 }
 function Mqtt(url, topic, will, onmsg, onstate) {
-  let ws, buf = new Uint8Array(0), ping, retry, closed = false, up = false, lastRx = 0, fails = 0;
+  let ws, buf = new Uint8Array(0), ping, retry, closed = false, up = false, lastRx = 0, fails = 0, openedAt = 0;
   const setUp = v => { if (up !== v) { up = v; onstate(v); } };
   function open() {
     clearTimeout(retry);
     try { ws = new WebSocket(url, 'mqtt'); } catch { retry = setTimeout(open, 5000); return; }
     ws.binaryType = 'arraybuffer';
-    buf = new Uint8Array(0); lastRx = Date.now();
+    buf = new Uint8Array(0); lastRx = openedAt = Date.now();
     ws.onopen = () => {
       const cid = 'w' + hex(crypto.getRandomValues(new Uint8Array(8)));
       const parts = [mqttStr('MQTT'), [4, 0x02 | (will ? 0x04 : 0)], [0, 30], mqttStr(cid)];
@@ -520,7 +529,12 @@ function Mqtt(url, topic, will, onmsg, onstate) {
       if (up && ws.readyState === 1 && ws.bufferedAmount < 300000)
         ws.send(mqttPkt(0x30, cat([mqttStr(topic), payload])));
     },
-    kick() { if (!closed && !up && (!ws || ws.readyState > 1)) { fails = 0; open(); } },
+    kick() {
+      if (closed) return;
+      const dead = up ? Date.now() - lastRx > 30000 : (ws && ws.readyState === 0 && Date.now() - openedAt > 8000);
+      if (dead) { clearInterval(ping); try { ws.onclose = null; ws.onmessage = null; ws.close(); } catch {} setUp(false); fails = 0; open(); }
+      else if (!up && (!ws || ws.readyState > 1)) { fails = 0; open(); }
+    },
     close() {
       closed = true; clearTimeout(retry); clearInterval(ping);
       try { if (ws.readyState === 1) ws.send(new Uint8Array([0xE0, 0])); ws.close(); } catch {}
@@ -542,7 +556,7 @@ async function seal(plain) {
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, S.key, plain));
   return cat([iv, ct]);
 }
-const ctlBytes = obj => cat([[0], te.encode(JSON.stringify(obj))]);
+const ctlBytes = obj => cat([[0], te.encode(JSON.stringify(obj.ts ? obj : Object.assign({ ts: now() }, obj)))]);
 
 /* ---------- estado ---------- */
 const S = {
@@ -553,9 +567,20 @@ const S = {
   tx: false, txId: 0, txTok: 0, seq: 0, enc: null, txTimer: 0, srcNode: null,
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
-  out: 'spk', boost: null, comp: null, lp: null
+  out: 'spk', boost: null, comp: null, lp: null,
+  skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0
 };
 const seen = new Set(), seenQ = [];
+const now = () => Date.now() + S.skew;      // hora corregida con la del servidor, por si el reloj del móvil está mal
+async function syncClock() {
+  try {
+    const t0 = Date.now();
+    const r = await fetch(location.pathname + '?t=' + t0, { method: 'HEAD', cache: 'no-store' });
+    const d = Date.parse(r.headers.get('date') || '');
+    if (Number.isFinite(d)) { const sk = d + 500 - (t0 + Date.now()) / 2; S.skew = Math.abs(sk) > 5000 ? sk : 0; }
+  } catch {}
+}
+const MAX_AGE = 15 * 60000, MAX_AUDIO_AGE_S = 60;
 const BASE_TITLE = document.title;
 
 /* ---------- chat / registro ---------- */
@@ -620,7 +645,7 @@ function flushOutbox() {
 const WORKLET = `
 class Cap extends AudioWorkletProcessor{
   constructor(){super();this.on=false;this.buf=new Int16Array(${FRAME});this.n=0;this.acc=0;this.cnt=0;this.pos=0;
-    this.ratio=sampleRate/${RATE};this.pk=0;this.pc=0;
+    this.ratio=sampleRate/${RATE};this.pk=0;this.pc=0;this.hx=0;this.hy=0;this.ha=Math.exp(-2*Math.PI*120/sampleRate);
     this.port.onmessage=e=>{
       if(e.data.on){this.on=true;this.n=0;this.acc=0;this.cnt=0;this.pos=0;}
       else if(this.on){this.on=false;if(this.n){this.buf.fill(0,this.n);this.flush();}this.port.postMessage({end:1});}
@@ -629,7 +654,7 @@ class Cap extends AudioWorkletProcessor{
   process(inputs){
     const ch=inputs[0]&&inputs[0][0];if(!ch)return true;
     for(let i=0;i<ch.length;i++){
-      const s=ch[i],a=s<0?-s:s;if(a>this.pk)this.pk=a;
+      const x=ch[i],s=this.ha*(this.hy+x-this.hx);this.hx=x;this.hy=s;const a=s<0?-s:s;if(a>this.pk)this.pk=a;
       if(this.on){this.acc+=s;this.cnt++;this.pos++;
         if(this.pos>=this.ratio){this.pos-=this.ratio;let v=this.acc/this.cnt;this.acc=0;this.cnt=0;
           v=v>1?1:v<-1?-1:v;this.buf[this.n++]=v*32767;if(this.n===${FRAME})this.flush();}}
@@ -684,7 +709,7 @@ async function initAudio() {
     S.master.connect(S.boost).connect(S.comp).connect(lp).connect(S.ctx.destination);
     S.ctx.onstatechange = () => { checkAudio(); if (S.ctx.state !== 'running' && S.joined) setTimeout(wakeAudio, 300); };
   }
-  await S.ctx.resume().catch(() => {});
+  await Promise.race([S.ctx.resume().catch(() => {}), new Promise(r => setTimeout(r, 400))]);   // sin toque previo, resume() se queda esperando
 }
 function wakeAudio() {                      // cualquier toque en la pantalla reactiva el audio si el navegador lo había dormido
   if (S.ctx && S.ctx.state !== 'running') S.ctx.resume().then(checkAudio).catch(() => {});
@@ -703,6 +728,12 @@ async function openMic() {
   S.srcNode.connect(S.cap);
   if (!S.tx) micEnable(false);
 }
+function idleMic() { if (IOS) micEnable(false); else closeMic(); }   // iOS: dejarlo abierto pero mudo evita pedir permiso en cada pulsación
+async function waitUnmuted(ms) {            // iOS tarda unos ms en reactivar la captura al cambiar la sesión de audio
+  const tr = S.mic && S.mic.getAudioTracks()[0];
+  if (!tr || !tr.muted) return;
+  await new Promise(res => { const t0 = setTimeout(res, ms); tr.addEventListener('unmute', () => { clearTimeout(t0); res(); }, { once: true }); });
+}
 function closeMic() {
   if (S.srcNode) { try { S.srcNode.disconnect(); } catch {} S.srcNode = null; }
   if (S.mic) { S.mic.getTracks().forEach(tr => tr.stop()); S.mic = null; }
@@ -720,8 +751,8 @@ async function initMic() {
       S.cap.connect(mute).connect(S.ctx.destination);
       S.cap.port.onmessage = onCap;
     }
-    const probe = await navigator.mediaDevices.getUserMedia(MIC_OPTS);   // solo para obtener el permiso
-    probe.getTracks().forEach(tr => tr.stop());
+    if (IOS) await openMic();                                            // iOS: un solo permiso, y el micro queda mudo
+    else { const probe = await navigator.mediaDevices.getUserMedia(MIC_OPTS); probe.getTracks().forEach(tr => tr.stop()); }   // solo para obtener el permiso
     S.micOk = true;
   } catch (e) {
     log(L('err_mic', e.message || e.name), { cls: 'err' });
@@ -784,12 +815,12 @@ async function applyOutput(announce) {
       else if (outs.length) await S.ctx.setSinkId('');
     }
   } catch {}
-  if (S.micOk && !S.tx) closeMic();
-  if (spk || picked) earOff();
+  if (S.micOk && !S.tx) idleMic();
+  if (spk || picked || IOS) earOff();      // en iPhone el auricular lo da la sesión de audio, sin bucle WebRTC
   else if (await earOn()) routed = true;
   $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', spk);
-  if (announce) log(L(spk ? (routed ? 'out_spk_ok' : 'out_spk_lim') : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
+  if (announce) log(L(spk ? (routed ? 'out_spk_ok' : (IOS ? 'out_spk_ios' : 'out_spk_lim')) : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
 }
 
 /* ---------- transmisión ---------- */
@@ -799,13 +830,14 @@ function onCap(e) {
   if (d.pcm) { sendFrame(d.pcm, 0); return; }
   if (d.end) {
     sendFrame(null, 1);
-    if (!S.tx) closeMic();
+    if (!S.tx) idleMic();
     syncSession();
   }
 }
 function sendFrame(pcm, last) {
-  const head = new Uint8Array(12);
-  head[0] = 1; head.set(S.id, 1);
+  const head = new Uint8Array(16), ts = Math.floor(now() / 1000);
+  head[0] = 2; head.set(S.id, 1);
+  head[12] = ts >>> 24; head[13] = (ts >>> 16) & 255; head[14] = (ts >>> 8) & 255; head[15] = ts & 255;
   head[5] = S.txId; head[6] = S.seq >> 8; head[7] = S.seq & 255;
   head[8] = (S.enc.p >> 8) & 255; head[9] = S.enc.p & 255; head[10] = S.enc.i; head[11] = last;
   let body = new Uint8Array(0);
@@ -825,10 +857,13 @@ async function startTx() {
   S.tx = true; syncSession(); render();
   try { await openMic(); }
   catch (e) { S.tx = false; syncSession(); log(L('err_mic', e.message || e.name), { cls: 'err' }); render(); return; }
-  if (tok !== S.txTok || !S.tx) { if (!S.tx) closeMic(); return; }   // soltaron antes de que abriera el micro
+  if (tok !== S.txTok || !S.tx) { if (!S.tx) idleMic(); return; }   // soltaron antes de que abriera el micro
   micEnable(true);
+  if (IOS) await waitUnmuted(400);
+  if (tok !== S.txTok || !S.tx) { if (!S.tx) idleMic(); return; }
   S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 };
   S.cap.port.postMessage({ on: 1 });
+  S.txStart = Date.now(); clearInterval(S.txIv); S.txIv = setInterval(render, 1000); render();
   beep([1200]);                             // pitido: ya puedes hablar
   vibe(25);
   clearTimeout(S.txTimer);
@@ -836,7 +871,7 @@ async function startTx() {
 }
 function stopTx() {
   if (!S.tx) return;
-  S.tx = false; S.txTok++; clearTimeout(S.txTimer);
+  S.tx = false; S.txTok++; clearTimeout(S.txTimer); clearInterval(S.txIv); S.txStart = 0;
   S.cap.port.postMessage({ on: 0 });
   vibe(15);
   meter(0);
@@ -848,14 +883,14 @@ async function onMsg(data) {
   if (!S.joined || data.length < 29) return;
   const k = String.fromCharCode.apply(null, data.subarray(0, 12));
   if (seen.has(k)) return;                      // el mismo paquete llega por varios brokers
-  seen.add(k); seenQ.push(k); if (seenQ.length > 1500) seen.delete(seenQ.shift());
+  seen.add(k); seenQ.push(k); if (seenQ.length > 12000) seen.delete(seenQ.shift());
   let pt;
   try {
     pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: data.slice(0, 12) }, S.key, data.slice(12)));
   } catch { return; }
   if (!S.joined) return;
   if (pt[0] === 0) { try { onCtl(JSON.parse(td.decode(pt.subarray(1)))); } catch {} }
-  else if (pt[0] === 1 && pt.length >= 12) onAudio(pt);
+  else if (pt[0] === 2 && pt.length >= 16) onAudio(pt);
 }
 function peerOf(id, nick) {
   let p = S.peers.get(id);
@@ -874,6 +909,8 @@ function peerOf(id, nick) {
 function onCtl(m) {
   if (!m || typeof m.id !== 'string' || m.id === S.idHex || !/^[0-9a-f]{8}$/.test(m.id)) return;
   const nick = String(m.nick || '').slice(0, 14) || '···';
+  const age = now() - m.ts;
+  if (m.t !== 'bye' && !(Math.abs(age) <= MAX_AGE)) return;    // sin fecha o demasiado viejo: descartado
   if (m.t === 'bye') {
     const p = S.peers.get(m.id);
     if (p) dropPeer(p, 'left_peer');
@@ -893,15 +930,15 @@ function onCtl(m) {
     if (!AL[m.k]) return;
     const ok = Number.isFinite(m.lat) && Number.isFinite(m.lon) && Math.abs(m.lat) <= 85 && Math.abs(m.lon) <= 180;
     const aid = typeof m.aid === 'string' && /^[0-9a-f]{8}$/.test(m.aid) ? m.aid : '';
-    const age = Number.isFinite(m.ts) ? Date.now() - m.ts : 0;
     peerOf(m.id, nick);
-    showAlert(m.k, nick, ok ? { lat: m.lat, lon: m.lon, acc: Number.isFinite(m.acc) ? Math.round(m.acc) : null } : null, false, aid, age > 45000 && age < 900000 ? age : 0);
+    showAlert(m.k, nick, ok ? { lat: m.lat, lon: m.lon, acc: Number.isFinite(m.acc) ? Math.round(m.acc) : null } : null, false, aid, age > 45000 ? age : 0);
     return;
   }
   if (m.t === 'clear') {
     if (typeof m.aid !== 'string' || !/^[0-9a-f]{8}$/.test(m.aid)) return;
     qsa('.toast[data-aid="' + m.aid + '"]').forEach(e => e.remove());
     qsa('.li.alert[data-aid="' + m.aid + '"]').forEach(e => e.classList.add('struck'));
+    if (S.last && S.last.aid === m.aid) { S.last = null; renderLast(); }
     log(L('cleared', nick), {});
     return;
   }
@@ -919,14 +956,16 @@ function dropPeer(p, whyKey) {
 function onAudio(pt) {
   const id = hex(pt.subarray(1, 5));
   if (id === S.idHex) return;
+  const ts = ((pt[12] << 24) | (pt[13] << 16) | (pt[14] << 8) | pt[15]) >>> 0;
+  if (Math.abs(now() / 1000 - ts) > MAX_AUDIO_AGE_S) return;   // audio viejo o repetido por un tercero: se descarta
   const p = peerOf(id);
   const tx = pt[5], seq = (pt[6] << 8) | pt[7], last = pt[11] & 1;
   if (tx === p.doneTx) return;
   let st = p.rx;
   if (st && st.tx !== tx) { finishRx(p); st = null; }
   if (!st) st = p.rx = { tx, base: null, got: new Set(), max: -1, endAt: 0, prev: 0 };
-  if (pt.length > 12) {
-    const pcm = adpcmDec(pt.subarray(12), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
+  if (pt.length > 16) {
+    const pcm = adpcmDec(pt.subarray(16), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
     const now = S.ctx.currentTime;
     if (st.base === null) st.base = now + JITTER_S - seq * FRAME_S;
     let when = st.base + seq * FRAME_S;
@@ -1022,6 +1061,16 @@ function miniMap(p) {                       // miniatura centrada en el punto (t
   a.append(document.createElement('i'));
   return a;
 }
+function renderLast() {                     // el último aviso recibido queda a la vista 15 min en la pantalla de radio
+  const el = $('lastAlert'), a = S.last;
+  const live = S.joined && a && Date.now() - a.t0 < MAX_AGE;
+  el.hidden = !live; $('radioPanel').classList.toggle('haslast', !!live);
+  if (!live) { S.last = null; return; }
+  const mins = Math.floor((Date.now() - a.t0) / 60000), me = freshPos();
+  el.className = 'lastal ' + a.k;
+  el.textContent = AL[a.k].ico + ' ' + L('al_' + a.k) + ' · ' + a.nick + ' · ' + (mins ? L('ago', mins) : L('just_now')) + (a.pos && me ? ' · ' + distText(me, a.pos) : '');
+  if (a.pos) el.href = osmUrl(a.pos); else el.removeAttribute('href');
+}
 function trimToasts() {
   const box = $('toasts');
   while (box.children.length > 3) {
@@ -1041,7 +1090,7 @@ function showAlert(k, nick, pos, mine, aid, ageMs, opts = {}) {
   if (pos) { const l = document.createElement('a'); l.href = osmUrl(pos); l.target = '_blank'; l.rel = 'noopener'; l.textContent = L('see_map'); li.append(l); }
   else li.append(' · ' + L('noloc'));
   feedAdd(li, mine);
-  if (!mine) noteUnread();
+  if (!mine) { noteUnread(); S.last = { k, nick, pos, aid, t0: Date.now() - (ageMs || 0) }; renderLast(); }
   // ventana emergente (no bloquea el uso de la app)
   const t = document.createElement('div'); t.className = 'toast ' + k; t.setAttribute('role', 'alert');
   if (aid) t.dataset.aid = aid;
@@ -1130,7 +1179,7 @@ async function fire(p) {
   if (!S.joined) return;
   cool[k] = Date.now();
   const aid = hex(crypto.getRandomValues(new Uint8Array(4)));
-  const msg = { t: 'alert', k, aid, id: S.idHex, nick: S.nick, ts: Date.now() };
+  const msg = { t: 'alert', k, aid, id: S.idHex, nick: S.nick, ts: now() };
   if (pos) { msg.lat = pos.lat; msg.lon = pos.lon; msg.acc = pos.acc; }
   const sent = sendCtl(msg, {});
   const line = showAlert(k, S.nick, pos, true, aid, 0, { queued: !sent });
@@ -1158,7 +1207,7 @@ function render() {
   else if (talkers.length) { st.textContent = '◉ ' + talkers.map(p => p.nick).join(', '); st.classList.add('rx'); }
   else if (up) { st.textContent = L('online'); st.classList.add('on'); }
   else st.textContent = L('connecting');
-  $('netBanner').hidden = !(S.joined && up === 0);
+  $('netBanner').hidden = !(S.joined && up === 0 && Date.now() - S.joinAt > 6000);
   if (!S.joined) return;
   $('count').textContent = '👥 ' + L('members', S.peers.size + 1);
   $('outBtn').textContent = L(S.out === 'spk' ? 'out_spk' : 'out_ear');
@@ -1169,7 +1218,7 @@ function render() {
   ptt.disabled = !S.micOk;
   const tap = $('tapTgl').checked;
   $('pttLbl').textContent = !S.micOk ? L('ptt_listen') : S.tx ? L('ptt_on') : talkers.length ? talkers[0].nick : tap ? L('ptt_tap') : L('ptt_hold');
-  $('pttSub').textContent = !S.micOk ? L('sub_nomic') : S.tx ? (tap ? L('sub_tapstop') : L('sub_release')) : talkers.length ? L('sub_rx') : (isDesktop() ? L('sub_space') : '');
+  $('pttSub').textContent = !S.micOk ? L('sub_nomic') : S.tx ? (S.txStart ? Math.floor((Date.now() - S.txStart) / 60000) + ':' + String(Math.floor((Date.now() - S.txStart) / 1000) % 60).padStart(2, '0') + ' · ' : '') + (tap ? L('sub_tapstop') : L('sub_release')) : talkers.length ? L('sub_rx') : (isDesktop() ? L('sub_space') : '');
 
   const box = $('peers'); box.textContent = '';
   const me = document.createElement('div'); me.className = 'peer me' + (S.tx ? ' talk' : ''); me.textContent = S.nick + ' (' + L('you') + ')';
@@ -1222,21 +1271,24 @@ async function join() {
     S.nick = ($('nick').value.trim().toUpperCase().slice(0, 14)) || '11N-' + (100 + Math.floor(Math.random() * 900));
     $('nick').value = S.nick;
     store.set('w.nick', S.nick); store.set('w.chan', chan);
+    await Promise.race([syncClock(), new Promise(r => setTimeout(r, 1500))]);
     await initAudio();
     if (!S.cap) await initMic(); else S.micOk = true;
+    S.ctx.resume().catch(() => {});             // iOS suele dormir el audio tras el aviso de permisos
     applyOutput(false);
     getPos(60000, 10000);                       // pide el permiso de ubicación ahora, con calma, no en plena emergencia
     const k = await deriveKeys(chan);
     S.key = k.key; S.topic = k.topic; S.chan = chan;
     S.id = crypto.getRandomValues(new Uint8Array(4)); S.idHex = hex(S.id);
     S.txId = crypto.getRandomValues(new Uint8Array(1))[0];
-    S.peers.clear(); S.outbox = []; S.joined = true;
+    S.peers.clear(); S.outbox = []; S.last = null; S.joined = true; S.joinAt = Date.now();
+    store.set('w.auto', String(Date.now())); setTimeout(render, 6200);
     const will = await seal(ctlBytes({ t: 'bye', id: S.idHex, nick: S.nick }));
     S.clients = BROKERS.map(u => Mqtt(u, S.topic, will, onMsg, upNow => {
       if (upNow && S.joined) { publish(ctlBytes({ t: 'hello', id: S.idHex, nick: S.nick })); flushOutbox(); }
       render();
     }));
-    S.timers = [setInterval(sweep, 2500)];
+    S.timers = [setInterval(sweep, 2500), setInterval(renderLast, 20000)];
     schedPresence();
     $('chanName').textContent = chan;
     $('joinPanel').hidden = true; $('radioPanel').hidden = false;
@@ -1270,7 +1322,7 @@ async function leave() {
   $('chatIn').disabled = true; $('chatSend').disabled = true;
   qsa('#quick button').forEach(b => { b.disabled = true; });
   qsa('.toast').forEach(e => e.remove());
-  S.unread = 0; showUnread();
+  S.unread = 0; showUnread(); store.del('w.auto'); renderLast();
   meter(0); render();
   log(L('left_chan'), {});
 }
@@ -1369,6 +1421,9 @@ $('tapTgl').checked = store.get('w.tap') === '1';
 S.out = store.get('w.out') === 'ear' ? 'ear' : 'spk';
 setTheme(document.documentElement.dataset.theme || 'light');
 applyLang();
+// Si el navegador recargó la página (pasa mucho en el móvil), vuelve a entrar solo en el canal en el que estabas
+const auto = +store.get('w.auto') || 0;
+if (auto && Date.now() - auto < 12 * 3600000 && store.get('w.chan') && (!hashKey || hashKey === store.get('w.chan'))) join();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 window.__w = S; S.ear = ear;
 })();
