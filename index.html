@@ -338,8 +338,8 @@ const I = {
     offline_banner: 'Sin conexión · reintentando…',
     out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
     out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (privado)',
-    out_spk_lim: 'Altavoz: volumen reforzado. Este navegador no deja elegir la salida; si sigue sonando por el auricular, súbelo o activa el altavoz desde el sistema.',
-    out_ear_lim: 'Auricular: volumen normal. Este navegador no deja elegir la salida; si no suena por el auricular, usa los controles del sistema.',
+    out_spk_lim: 'Altavoz: el micrófono solo se abre al hablar y el volumen va reforzado. Sube el volumen de medios del móvil.',
+    out_ear_lim: 'Auricular: modo llamada, suena más bajo. Usa el volumen de llamada del móvil.',
     chan_lbl: 'Clave de canal', chan_ph: 'CLAVE LARGA', newkey: 'Clave aleatoria', chan_cnt: '{0} / 20 · mínimo 10',
     nick_lbl: 'Tu nombre', nick_ph: 'Tu nombre (opcional)', join: 'Entrar en el canal', joining: 'Entrando…',
     hint: 'Sin cuenta, sin email, sin número. Voz, mensajes y avisos van cifrados con la clave del canal: compártela solo con los tuyos y cámbiala si se filtra. Con auriculares evitas ecos entre móviles cercanos.',
@@ -368,8 +368,8 @@ const I = {
     offline_banner: 'Sense connexió · reintentant…',
     out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
     out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (privat)',
-    out_spk_lim: 'Altaveu: volum reforçat. Aquest navegador no deixa triar la sortida; si continua sonant pel auricular, puja\'l o activa l\'altaveu des del sistema.',
-    out_ear_lim: 'Auricular: volum normal. Aquest navegador no deixa triar la sortida; si no sona pel auricular, fes servir els controls del sistema.',
+    out_spk_lim: 'Altaveu: el micròfon només s\'obre en parlar i el volum va reforçat. Puja el volum de multimèdia del mòbil.',
+    out_ear_lim: 'Auricular: mode trucada, sona més baix. Fes servir el volum de trucada del mòbil.',
     chan_lbl: 'Clau del canal', chan_ph: 'CLAU LLARGA', newkey: 'Clau aleatòria', chan_cnt: '{0} / 20 · mínim 10',
     nick_lbl: 'El teu nom', nick_ph: 'El teu nom (opcional)', join: 'Entrar al canal', joining: 'Entrant…',
     hint: 'Sense compte, sense correu, sense número. Veu, missatges i avisos van xifrats amb la clau del canal: comparteix-la només amb els teus i canvia-la si es filtra. Amb auriculars eviteu ecos entre mòbils propers.',
@@ -550,7 +550,7 @@ const S = {
   id: null, idHex: '',
   clients: [], peers: new Map(),
   ctx: null, master: null, mic: null, cap: null, micOk: false,
-  tx: false, txId: 0, seq: 0, enc: null, txTimer: 0,
+  tx: false, txId: 0, txTok: 0, seq: 0, enc: null, txTimer: 0, srcNode: null,
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
   out: 'spk', boost: null, comp: null
@@ -686,23 +686,36 @@ async function initAudio() {
   await S.ctx.resume().catch(() => {});
 }
 function checkAudio() { $('audioBanner').hidden = !(S.joined && S.ctx && S.ctx.state !== 'running'); }
+const MIC_OPTS = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } };
 const micEnable = on => { if (S.mic) S.mic.getAudioTracks().forEach(tr => { tr.enabled = on; }); };
+// Mientras el micrófono está abierto, Android/iOS ponen el audio en «modo llamada» y suena flojo por el auricular.
+// Por eso en modo altavoz el micrófono se abre solo al hablar y se suelta al terminar.
+async function openMic() {
+  if (S.mic && S.mic.active) return;
+  S.mic = await navigator.mediaDevices.getUserMedia(MIC_OPTS);
+  S.srcNode = S.ctx.createMediaStreamSource(S.mic);
+  S.srcNode.connect(S.cap);
+  if (!S.tx) micEnable(false);
+}
+function closeMic() {
+  if (S.srcNode) { try { S.srcNode.disconnect(); } catch {} S.srcNode = null; }
+  if (S.mic) { S.mic.getTracks().forEach(tr => tr.stop()); S.mic = null; }
+}
 async function initMic() {
   S.micOk = false;
   try {
     if (!navigator.mediaDevices || !S.ctx.audioWorklet) throw new Error('sin soporte');
-    S.mic = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
-    });
-    const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
-    await S.ctx.audioWorklet.addModule(url);
-    URL.revokeObjectURL(url);
-    const srcNode = S.ctx.createMediaStreamSource(S.mic);
-    S.cap = new AudioWorkletNode(S.ctx, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1 });
-    const mute = S.ctx.createGain(); mute.gain.value = 0;
-    srcNode.connect(S.cap).connect(mute).connect(S.ctx.destination);
-    S.cap.port.onmessage = onCap;
-    micEnable(false);                           // el micrófono solo "escucha" mientras transmites
+    if (!S.cap) {
+      const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+      await S.ctx.audioWorklet.addModule(url);
+      URL.revokeObjectURL(url);
+      S.cap = new AudioWorkletNode(S.ctx, 'cap', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1 });
+      const mute = S.ctx.createGain(); mute.gain.value = 0;
+      S.cap.connect(mute).connect(S.ctx.destination);
+      S.cap.port.onmessage = onCap;
+    }
+    const probe = await navigator.mediaDevices.getUserMedia(MIC_OPTS);   // solo para obtener el permiso
+    probe.getTracks().forEach(tr => tr.stop());
     S.micOk = true;
   } catch (e) {
     log(L('err_mic', e.message || e.name), { cls: 'err' });
@@ -730,6 +743,7 @@ async function applyOutput(announce) {
       else if (outs.length) await S.ctx.setSinkId('');
     }
   } catch {}
+  if (S.micOk) { if (spk) { if (!S.tx) closeMic(); } else openMic().catch(() => {}); }
   $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', spk);
   if (announce) log(L(spk ? (routed ? 'out_spk_ok' : 'out_spk_lim') : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
@@ -742,7 +756,7 @@ function onCap(e) {
   if (d.pcm) { sendFrame(d.pcm, 0); return; }
   if (d.end) {
     sendFrame(null, 1);
-    micEnable(false);
+    if (!S.tx) { if (S.out === 'spk') closeMic(); else micEnable(false); }
     syncSession();
   }
 }
@@ -760,23 +774,26 @@ async function publish(plain) {
   const msg = await seal(plain);
   for (const c of S.clients) c.publish(msg);
 }
-function startTx() {
+async function startTx() {
   if (!S.joined || !S.micOk || S.tx) return;
   if (!S.clients.some(c => c.up)) { log(L('offline_tx'), { cls: 'err' }); vibe([60, 40, 60]); return; }
   S.ctx.resume();
-  S.tx = true; syncSession();               // para grabar, el iPhone necesita la sesión «play-and-record»
+  const tok = ++S.txTok;
+  S.tx = true; syncSession(); render();
+  try { await openMic(); }
+  catch (e) { S.tx = false; syncSession(); log(L('err_mic', e.message || e.name), { cls: 'err' }); render(); return; }
+  if (tok !== S.txTok || !S.tx) { if (!S.tx && S.out === 'spk') closeMic(); return; }   // soltaron antes de que abriera el micro
   micEnable(true);
   S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 };
   S.cap.port.postMessage({ on: 1 });
-  beep([1200]);
+  beep([1200]);                             // pitido: ya puedes hablar
   vibe(25);
   clearTimeout(S.txTimer);
   S.txTimer = setTimeout(() => { log(L('cut', MAX_TX_S)); stopTx(); }, MAX_TX_S * 1000);
-  render();
 }
 function stopTx() {
   if (!S.tx) return;
-  S.tx = false; clearTimeout(S.txTimer);
+  S.tx = false; S.txTok++; clearTimeout(S.txTimer);
   S.cap.port.postMessage({ on: 0 });
   vibe(15);
   meter(0);
@@ -1204,7 +1221,7 @@ async function leave() {
   for (const p of S.peers.values()) clearTimeout(p.tmo);
   S.peers.clear(); S.outbox = [];
   if (S.wake) { try { S.wake.release(); } catch {} S.wake = null; }
-  micEnable(false);
+  closeMic();
   $('radioPanel').hidden = true; $('joinPanel').hidden = false; $('audioBanner').hidden = true;
   $('app').classList.remove('in'); setTab('radio');
   $('chatIn').disabled = true; $('chatSend').disabled = true;
