@@ -105,8 +105,8 @@ input[type=text]:focus{border-color:var(--red)}
 .tg input[type=checkbox]{width:20px;height:20px;accent-color:var(--red)}
 .tg.vol{flex:1;min-width:130px}
 .tg.vol input{flex:1;accent-color:var(--red)}
-.banner{margin-top:12px}
-.banner button{width:100%;background:var(--dark);color:#fff;border:0;border-radius:12px;padding:14px;font-weight:700;cursor:pointer}
+.banner{margin:0 0 12px}
+.banner button{width:100%;background:#f5a524;color:#1b1300;border:0;border-radius:14px;padding:16px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 4px 14px #f5a52455;animation:blink 1s infinite alternate}
 .alerts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .al{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:74px;padding:8px 2px;border:0;border-radius:14px;color:#fff;font-weight:800;font-size:12px;cursor:pointer;
   user-select:none;-webkit-user-select:none;transition:transform .08s;line-height:1.15;text-align:center}
@@ -208,6 +208,7 @@ input[type=text]:focus{border-color:var(--red)}
 
   <main class="cols">
     <section id="radio" class="pane card">
+      <div id="audioBanner" class="banner" hidden><button id="audioBtn" type="button" data-i="audio_on"></button></div>
       <div id="joinPanel">
         <img class="hero" src="logo.png" alt="11N Vaga General · Walkie-Talkie" width="640" height="640">
         <label class="lbl" for="chan" data-i="chan_lbl"></label>
@@ -257,7 +258,6 @@ input[type=text]:focus{border-color:var(--red)}
 
         <button id="wipeBtn" class="wipe" type="button" data-i="wipe"></button>
       </div>
-      <div id="audioBanner" class="banner" hidden><button id="audioBtn" type="button" data-i="audio_on"></button></div>
     </section>
 
     <section id="chat" class="pane card side">
@@ -337,7 +337,7 @@ const I = {
   es: {
     offline_banner: 'Sin conexión · reintentando…',
     out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
-    out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (privado)',
+    out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (modo llamada). Pega el móvil a la oreja.',
     out_spk_lim: 'Altavoz: el micrófono solo se abre al hablar y el volumen va reforzado. Sube el volumen de medios del móvil.',
     out_ear_lim: 'Auricular: modo llamada, suena más bajo. Usa el volumen de llamada del móvil.',
     chan_lbl: 'Clave de canal', chan_ph: 'CLAVE LARGA', newkey: 'Clave aleatoria', chan_cnt: '{0} / 20 · mínimo 10',
@@ -359,7 +359,7 @@ const I = {
     tab_radio: 'Radio', tab_chat: 'Chat',
     foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. El audio no se graba ni se guarda en ningún sitio: suena y desaparece.',
     inv_title: 'Invitar al canal', inv_scan: 'Que escaneen este código con la cámara del móvil', inv_share: 'Compartir enlace', inv_copy: 'Copiar enlace', inv_copied: 'Enlace copiado',
-    wipe: 'Salir y borrar mis datos', audio_on: 'Toca para activar el audio',
+    wipe: 'Salir y borrar mis datos', audio_on: '🔊 Toca aquí para activar el audio',
     in_chan: 'En el canal {0} como {1}', joined_peer: '{0} entra en el canal', left_peer: '{0} sale del canal', lost_peer: '{0} sin señal', left_chan: 'Has salido del canal', wiped: 'Datos borrados',
     err_mic: 'Sin micrófono: solo escuchas ({0})', err_https: 'Hace falta HTTPS para cifrar. Abre la página por https://', err_join: 'No se pudo entrar: {0}',
     offline_tx: 'Sin conexión: no se puede transmitir', cut: 'Corte automático a los {0} s', wait: 'Espera unos segundos antes de repetir el aviso'
@@ -367,7 +367,7 @@ const I = {
   ca: {
     offline_banner: 'Sense connexió · reintentant…',
     out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
-    out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (privat)',
+    out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (mode trucada). Enganxa el mòbil a l\'orella.',
     out_spk_lim: 'Altaveu: el micròfon només s\'obre en parlar i el volum va reforçat. Puja el volum de multimèdia del mòbil.',
     out_ear_lim: 'Auricular: mode trucada, sona més baix. Fes servir el volum de trucada del mòbil.',
     chan_lbl: 'Clau del canal', chan_ph: 'CLAU LLARGA', newkey: 'Clau aleatòria', chan_cnt: '{0} / 20 · mínim 10',
@@ -389,7 +389,7 @@ const I = {
     tab_radio: 'Ràdio', tab_chat: 'Xat',
     foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. L\'àudio no es grava ni es guarda enlloc: sona i desapareix.',
     inv_title: 'Convidar al canal', inv_scan: 'Que escanegin aquest codi amb la càmera del mòbil', inv_share: 'Comparteix l\'enllaç', inv_copy: 'Copia l\'enllaç', inv_copied: 'Enllaç copiat',
-    wipe: 'Sortir i esborrar les meves dades', audio_on: 'Toca per activar l\'àudio',
+    wipe: 'Sortir i esborrar les meves dades', audio_on: '🔊 Toca aquí per activar l\'àudio',
     in_chan: 'Al canal {0} com a {1}', joined_peer: '{0} entra al canal', left_peer: '{0} surt del canal', lost_peer: '{0} sense senyal', left_chan: 'Has sortit del canal', wiped: 'Dades esborrades',
     err_mic: 'Sense micròfon: només escoltes ({0})', err_https: 'Cal HTTPS per xifrar. Obre la pàgina per https://', err_join: 'No s\'ha pogut entrar: {0}',
     offline_tx: 'Sense connexió: no es pot transmetre', cut: 'Tall automàtic als {0} s', wait: 'Espera uns segons abans de repetir l\'avís'
@@ -553,7 +553,7 @@ const S = {
   tx: false, txId: 0, txTok: 0, seq: 0, enc: null, txTimer: 0, srcNode: null,
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
-  out: 'spk', boost: null, comp: null
+  out: 'spk', boost: null, comp: null, lp: null
 };
 const seen = new Set(), seenQ = [];
 const BASE_TITLE = document.title;
@@ -680,16 +680,22 @@ async function initAudio() {
     S.boost = S.ctx.createGain();                                   // refuerzo del modo altavoz
     S.comp = S.ctx.createDynamicsCompressor();                      // evita que el refuerzo sature
     S.comp.threshold.value = -14; S.comp.knee.value = 12; S.comp.attack.value = 0.003; S.comp.release.value = 0.2;
+    S.lp = lp;
     S.master.connect(S.boost).connect(S.comp).connect(lp).connect(S.ctx.destination);
-    S.ctx.onstatechange = checkAudio;
+    S.ctx.onstatechange = () => { checkAudio(); if (S.ctx.state !== 'running' && S.joined) setTimeout(wakeAudio, 300); };
   }
   await S.ctx.resume().catch(() => {});
 }
+function wakeAudio() {                      // cualquier toque en la pantalla reactiva el audio si el navegador lo había dormido
+  if (S.ctx && S.ctx.state !== 'running') S.ctx.resume().then(checkAudio).catch(() => {});
+  if (ear.el && ear.el.srcObject && ear.el.paused) ear.el.play().catch(() => {});
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, wakeAudio, { capture: true, passive: true }));
 function checkAudio() { $('audioBanner').hidden = !(S.joined && S.ctx && S.ctx.state !== 'running'); }
 const MIC_OPTS = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } };
 const micEnable = on => { if (S.mic) S.mic.getAudioTracks().forEach(tr => { tr.enabled = on; }); };
 // Mientras el micrófono está abierto, Android/iOS ponen el audio en «modo llamada» y suena flojo por el auricular.
-// Por eso en modo altavoz el micrófono se abre solo al hablar y se suelta al terminar.
+// Por eso el micrófono se abre solo al hablar y se suelta al terminar.
 async function openMic() {
   if (S.mic && S.mic.active) return;
   S.mic = await navigator.mediaDevices.getUserMedia(MIC_OPTS);
@@ -723,6 +729,41 @@ async function initMic() {
 }
 
 /* ---------- salida de audio: auricular / altavoz ---------- */
+// Android/Chrome reproduce el audio WebRTC como audio de llamada (auricular) y el de Web Audio como multimedia (altavoz).
+// Para el modo auricular se pasa la mezcla por un bucle WebRTC local y se reproduce en un <audio>.
+const ear = { pcA: null, pcB: null, el: null };
+async function earOn() {
+  if (ear.pcA) return true;
+  if (!window.RTCPeerConnection || !S.ctx.createMediaStreamDestination) return false;
+  const dest = S.ctx.createMediaStreamDestination();
+  const pcA = new RTCPeerConnection(), pcB = new RTCPeerConnection();
+  const el = document.createElement('audio');
+  el.autoplay = true; el.playsInline = true; el.style.display = 'none'; document.body.append(el);
+  try {
+    pcA.onicecandidate = e => { if (e.candidate) pcB.addIceCandidate(e.candidate).catch(() => {}); };
+    pcB.onicecandidate = e => { if (e.candidate) pcA.addIceCandidate(e.candidate).catch(() => {}); };
+    pcB.ontrack = e => { el.srcObject = e.streams[0]; el.play().catch(() => {}); };
+    dest.stream.getAudioTracks().forEach(tr => pcA.addTrack(tr, dest.stream));
+    await pcA.setLocalDescription(await pcA.createOffer());
+    await pcB.setRemoteDescription(pcA.localDescription);
+    await pcB.setLocalDescription(await pcB.createAnswer());
+    await pcA.setRemoteDescription(pcB.localDescription);
+    S.lp.disconnect(); S.lp.connect(dest);
+    Object.assign(ear, { pcA, pcB, el });
+    return true;
+  } catch {
+    try { pcA.close(); pcB.close(); } catch {}
+    el.remove();
+    return false;
+  }
+}
+function earOff() {
+  if (!ear.pcA) return;
+  try { S.lp.disconnect(); S.lp.connect(S.ctx.destination); } catch {}
+  try { ear.pcA.close(); ear.pcB.close(); } catch {}
+  try { ear.el.srcObject = null; ear.el.remove(); } catch {}
+  ear.pcA = ear.pcB = ear.el = null;
+}
 // Los navegadores no tienen un interruptor estándar: se combinan tres técnicas y se informa de cuál ha funcionado.
 const SPK_RE = /speaker|altavoz|altaveu|loud|manos libres|hands.?free/i;
 const EAR_RE = /earpiece|receiver|handset|auricular|tel[eé]fono|telephone|phone/i;
@@ -734,16 +775,18 @@ function syncSession() {                    // iPhone/Safari: «playback» suena
 async function applyOutput(announce) {
   const spk = S.out === 'spk';
   if (S.boost) { S.boost.gain.value = spk ? 1.8 : 1; S.comp.ratio.value = spk ? 8 : 1; }
-  let routed = syncSession();
+  let routed = syncSession(), picked = false;
   try {                                     // Chrome/Edge/Android: elegir el dispositivo de salida si el navegador lo ofrece
     if (S.ctx && typeof S.ctx.setSinkId === 'function' && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
       const outs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput');
       const pick = outs.find(d => (spk ? SPK_RE : EAR_RE).test(d.label));
-      if (pick) { await S.ctx.setSinkId(pick.deviceId); routed = true; }
+      if (pick) { await S.ctx.setSinkId(pick.deviceId); routed = true; picked = true; }
       else if (outs.length) await S.ctx.setSinkId('');
     }
   } catch {}
-  if (S.micOk) { if (spk) { if (!S.tx) closeMic(); } else openMic().catch(() => {}); }
+  if (S.micOk && !S.tx) closeMic();
+  if (spk || picked) earOff();
+  else if (await earOn()) routed = true;
   $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', spk);
   if (announce) log(L(spk ? (routed ? 'out_spk_ok' : 'out_spk_lim') : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
@@ -756,7 +799,7 @@ function onCap(e) {
   if (d.pcm) { sendFrame(d.pcm, 0); return; }
   if (d.end) {
     sendFrame(null, 1);
-    if (!S.tx) { if (S.out === 'spk') closeMic(); else micEnable(false); }
+    if (!S.tx) closeMic();
     syncSession();
   }
 }
@@ -782,7 +825,7 @@ async function startTx() {
   S.tx = true; syncSession(); render();
   try { await openMic(); }
   catch (e) { S.tx = false; syncSession(); log(L('err_mic', e.message || e.name), { cls: 'err' }); render(); return; }
-  if (tok !== S.txTok || !S.tx) { if (!S.tx && S.out === 'spk') closeMic(); return; }   // soltaron antes de que abriera el micro
+  if (tok !== S.txTok || !S.tx) { if (!S.tx) closeMic(); return; }   // soltaron antes de que abriera el micro
   micEnable(true);
   S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 };
   S.cap.port.postMessage({ on: 1 });
@@ -1221,7 +1264,7 @@ async function leave() {
   for (const p of S.peers.values()) clearTimeout(p.tmo);
   S.peers.clear(); S.outbox = [];
   if (S.wake) { try { S.wake.release(); } catch {} S.wake = null; }
-  closeMic();
+  closeMic(); earOff();
   $('radioPanel').hidden = true; $('joinPanel').hidden = false; $('audioBanner').hidden = true;
   $('app').classList.remove('in'); setTab('radio');
   $('chatIn').disabled = true; $('chatSend').disabled = true;
@@ -1273,7 +1316,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator
 $('vol').oninput = e => { if (S.master) S.master.gain.value = +e.target.value; store.set('w.vol', e.target.value); };
 $('beepTgl').onchange = e => store.set('w.beep', e.target.checked ? '1' : '0');
 $('tapTgl').onchange = e => { stopTx(); store.set('w.tap', e.target.checked ? '1' : '0'); render(); };
-$('audioBtn').onclick = () => S.ctx && S.ctx.resume().then(checkAudio);
+$('audioBtn').onclick = wakeAudio;
 qsa('.al').forEach(b => { b.onclick = () => alertBtn(b); });
 qsa('#tabs button').forEach(b => { b.onclick = () => setTab(b.dataset.tab); });
 
@@ -1327,7 +1370,7 @@ S.out = store.get('w.out') === 'ear' ? 'ear' : 'spk';
 setTheme(document.documentElement.dataset.theme || 'light');
 applyLang();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__w = S;
+window.__w = S; S.ear = ear;
 })();
 </script>
 </body>
