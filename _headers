@@ -1,0 +1,8 @@
+/*
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  Permissions-Policy: microphone=(self), geolocation=(self), camera=()
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache

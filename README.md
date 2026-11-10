@@ -2,7 +2,9 @@
 
 Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta, sin registro, sin servidor propio y sin límite de usuarios en la app. En castellano y catalán.
 
-## ▶ Abrir la app: https://mr-d0nut.github.io/Walkie/
+## Publicar
+
+Son archivos estáticos: sirve cualquier hosting (Cloudflare Pages, Netlify…). Sube el contenido de esta carpeta tal cual, sin comando de compilación y con el directorio de salida en la raíz. Los enlaces de invitación y los QR usan automáticamente la dirección donde esté publicada.
 
 ## Uso (3 pasos)
 
