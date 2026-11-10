@@ -1,6 +1,6 @@
 # 11N Vaga General · Walkie-Talkie
 
-Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta, sin registro, sin servidor propio. En castellano y catalán.
+Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta, sin registro, sin servidor propio y sin límite de usuarios en la app. En castellano y catalán.
 
 ## ▶ Abrir la app: https://mr-d0nut.github.io/Walkie/
 
@@ -16,7 +16,8 @@ Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta,
 - **Sin cobertura**: los mensajes y avisos se guardan y salen solos al volver la conexión (hasta 3 min). La app se abre aunque no haya datos tras la primera visita.
 - **Mensajes rápidos** de un toque («Todo bien», «Voy para allá», «Necesito relevo»…) y chat normal. Avisos de no leídos en la pestaña.
 - **Modo oscuro** para la noche y **modo claro** para el sol; botones grandes y una sola mano.
-- **⟲ repetir último** audio si no lo oíste con el ruido.
+- **Salida de audio**: botón 🔊 Altavoz / 📞 Auricular junto al estado. Altavoz = manos libres con volumen reforzado; Auricular = privado, para pegar el móvil a la oreja.
+- **El audio no se graba ni se guarda**: suena y desaparece. No hay historial de voz.
 - El micrófono solo se activa mientras hablas. La pantalla se mantiene encendida mientras estás en el canal.
 - **Salir y borrar mis datos** elimina del móvil la clave del canal y el nombre.
 - Se puede «Añadir a pantalla de inicio» y se abre como una app.
@@ -31,7 +32,8 @@ Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta,
 
 ## Límites conocidos
 
-- Los brokers públicos son gratuitos y sin garantías: para convocatorias grandes conviene un broker propio y canales de pocas decenas de personas.
+- La app no limita el número de personas, pero los brokers públicos son gratuitos y sin garantías: para convocatorias grandes conviene un broker propio con `?broker=`.
 - Con el móvil bloqueado o la app en segundo plano el navegador corta el audio: hay que tener la app abierta.
+- La elección auricular/altavoz depende del navegador: hay selección real de salida donde el navegador la ofrece (Chrome/Edge y Safari en iPhone reciente) y, si no, solo se ajusta el volumen. La app avisa de cuál ha podido aplicar.
 - Móviles muy juntos pueden hacer eco entre sí: mejor con auriculares.
 - Quien tenga la clave del canal ve los avisos y las ubicaciones: compártela solo con gente de confianza.

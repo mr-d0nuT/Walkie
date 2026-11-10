@@ -52,6 +52,9 @@ button{touch-action:manipulation}
 .state.tx{color:#fff;background:var(--red);border-color:var(--red)}
 .state.rx{color:#fff;background:var(--dark);border-color:var(--dark)}
 .count{font-size:13px;font-weight:700;color:var(--mut);white-space:nowrap}
+.outbtn{flex:none;min-height:38px;padding:7px 12px;font-size:13px}
+.outbtn.loud{background:var(--dark);border-color:var(--dark);color:#fff}
+.statusrow .state{flex:1}
 .hero{display:block;width:min(52%,210px);height:auto;margin:0 auto 2px}
 .lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
 .alertslbl{margin:10px 0 6px}
@@ -129,10 +132,6 @@ input[type=text]:focus{border-color:var(--red)}
 .li.mine .ts{color:#ffd9d9}
 .li.pend{opacity:.6}
 .li.pend .ts::after{content:" ⏳"}
-.li.voice{display:flex;align-items:center;gap:10px}
-.li.voice .x{font-weight:600}
-.li.voice button{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--red);color:#fff;cursor:pointer;font-size:13px;padding-left:2px}
-.li.voice.mine button{background:#fff;color:var(--red)}
 .li.sys{align-self:center;max-width:100%;background:none;color:var(--mut);font-size:12px;padding:2px 6px;text-align:center}
 .li.sys.err{color:var(--acc);font-weight:700}
 .li.alert{align-self:stretch;max-width:100%;color:#fff;border-radius:12px;font-weight:700}
@@ -178,6 +177,7 @@ input[type=text]:focus{border-color:var(--red)}
 .toast .nomap{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:#555;padding:4px;line-height:1.2}
 .toast .tb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:11.5px;line-height:1.25}
 .toast .tb b{font-size:13.5px;letter-spacing:.02em}
+.toast .tb .alias{font-size:16px;font-weight:800;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .toast .tb a,.toast .tb button.undo{pointer-events:auto;color:#fff;font-weight:700}
 .toast .tb button.undo{align-self:flex-start;background:#ffffff33;border:0;border-radius:8px;padding:5px 10px;font-size:12px;margin-top:3px;cursor:pointer}
 .toast .x{pointer-events:auto;align-self:flex-start;flex:none;width:32px;height:32px;border-radius:50%;border:0;background:#ffffff2e;color:#fff;font-size:18px;line-height:1;cursor:pointer}
@@ -233,7 +233,7 @@ input[type=text]:focus{border-color:var(--red)}
             <button id="leaveBtn" class="mini danger" type="button" data-i="leave"></button>
           </div>
         </div>
-        <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div></div>
+        <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div><button id="outBtn" class="mini outbtn" type="button" data-ti="out_title"></button></div>
         <div id="peers" class="peers"></div>
 
         <button id="ptt" class="ptt" type="button">
@@ -252,7 +252,6 @@ input[type=text]:focus{border-color:var(--red)}
         <div class="toggles">
           <label class="tg"><input type="checkbox" id="tapTgl"> <span data-i="tap_mode"></span></label>
           <label class="tg"><input type="checkbox" id="beepTgl" checked> <span data-i="beeps"></span></label>
-          <button id="replayBtn" class="mini" type="button" data-i="replay"></button>
           <label class="tg vol"><span data-i="vol"></span><input type="range" id="vol" min="0" max="1.5" step="0.05" value="1"></label>
         </div>
 
@@ -337,15 +336,19 @@ const isDesktop = () => matchMedia('(min-width:840px)').matches;
 const I = {
   es: {
     offline_banner: 'Sin conexión · reintentando…',
+    out_title: 'Salida de audio', out_spk: '🔊 Altavoz', out_ear: '📞 Auricular',
+    out_spk_ok: 'Salida: altavoz (manos libres)', out_ear_ok: 'Salida: auricular (privado)',
+    out_spk_lim: 'Altavoz: volumen reforzado. Este navegador no deja elegir la salida; si sigue sonando por el auricular, súbelo o activa el altavoz desde el sistema.',
+    out_ear_lim: 'Auricular: volumen normal. Este navegador no deja elegir la salida; si no suena por el auricular, usa los controles del sistema.',
     chan_lbl: 'Clave de canal', chan_ph: 'CLAVE LARGA', newkey: 'Clave aleatoria', chan_cnt: '{0} / 20 · mínimo 10',
     nick_lbl: 'Tu nombre', nick_ph: 'Tu nombre (opcional)', join: 'Entrar en el canal', joining: 'Entrando…',
     hint: 'Sin cuenta, sin email, sin número. Voz, mensajes y avisos van cifrados con la clave del canal: compártela solo con los tuyos y cámbiala si se filtra. Con auriculares evitas ecos entre móviles cercanos.',
     key_lbl: 'Clave', invite: 'invitar', leave: 'salir',
     disconnected: 'desconectado', connecting: 'conectando…', online: 'en línea', transmitting: '● transmitiendo',
-    members: '{0} en el canal', you: 'tú', alone: 'nadie más en el canal · pulsa «invitar»',
+    members: '{0}', you: 'tú', alone: 'nadie más en el canal · pulsa «invitar»',
     ptt_hold: 'MANTÉN PARA HABLAR', ptt_tap: 'TOCA PARA HABLAR', ptt_on: 'HABLANDO', ptt_listen: 'SOLO ESCUCHA',
     sub_space: 'o la barra espaciadora', sub_release: 'suelta para escuchar', sub_tapstop: 'toca para soltar', sub_rx: 'recibiendo…', sub_nomic: 'micrófono no disponible',
-    tap_mode: 'tocar en vez de mantener', beeps: 'pitidos', vol: 'vol', replay: '⟲ repetir último',
+    tap_mode: 'tocar en vez de mantener', beeps: 'pitidos', vol: 'vol',
     alerts_lbl: 'Avisos con tu ubicación', al_pol: 'Policía', al_alt: 'Altercado', al_sos: 'SOS', al_loc: 'Estoy aquí',
     n_pol: 'PRESENCIA POLICIAL', n_alt: 'ALTERCADO', n_sos: 'SOS', n_loc: 'UBICACIÓN',
     cancel_n: '✕ Cancelar · {0}', locating: 'Ubicando…', sent_to: 'Enviado a {0}', sent_none: 'Enviado · nadie más conectado ahora',
@@ -354,25 +357,28 @@ const I = {
     chat_title: 'Chat del canal', chat_ph: 'Escribe un mensaje…', chat_empty: 'Entra en un canal para hablar y chatear.',
     q1: '👍 Todo bien', q2: '🏃 Voy para allá', q3: '🙋 Necesito relevo', q4: '💧 Falta agua', q5: '📣 Venid al piquete',
     tab_radio: 'Radio', tab_chat: 'Chat',
-    foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. No se guarda historial: solo ves lo que llega mientras estás dentro.',
+    foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. El audio no se graba ni se guarda en ningún sitio: suena y desaparece.',
     inv_title: 'Invitar al canal', inv_scan: 'Que escaneen este código con la cámara del móvil', inv_share: 'Compartir enlace', inv_copy: 'Copiar enlace', inv_copied: 'Enlace copiado',
     wipe: 'Salir y borrar mis datos', audio_on: 'Toca para activar el audio',
     in_chan: 'En el canal {0} como {1}', joined_peer: '{0} entra en el canal', left_peer: '{0} sale del canal', lost_peer: '{0} sin señal', left_chan: 'Has salido del canal', wiped: 'Datos borrados',
-    voice: '🎙 {0} s',
     err_mic: 'Sin micrófono: solo escuchas ({0})', err_https: 'Hace falta HTTPS para cifrar. Abre la página por https://', err_join: 'No se pudo entrar: {0}',
     offline_tx: 'Sin conexión: no se puede transmitir', cut: 'Corte automático a los {0} s', wait: 'Espera unos segundos antes de repetir el aviso'
   },
   ca: {
     offline_banner: 'Sense connexió · reintentant…',
+    out_title: 'Sortida d\'àudio', out_spk: '🔊 Altaveu', out_ear: '📞 Auricular',
+    out_spk_ok: 'Sortida: altaveu (mans lliures)', out_ear_ok: 'Sortida: auricular (privat)',
+    out_spk_lim: 'Altaveu: volum reforçat. Aquest navegador no deixa triar la sortida; si continua sonant pel auricular, puja\'l o activa l\'altaveu des del sistema.',
+    out_ear_lim: 'Auricular: volum normal. Aquest navegador no deixa triar la sortida; si no sona pel auricular, fes servir els controls del sistema.',
     chan_lbl: 'Clau del canal', chan_ph: 'CLAU LLARGA', newkey: 'Clau aleatòria', chan_cnt: '{0} / 20 · mínim 10',
     nick_lbl: 'El teu nom', nick_ph: 'El teu nom (opcional)', join: 'Entrar al canal', joining: 'Entrant…',
     hint: 'Sense compte, sense correu, sense número. Veu, missatges i avisos van xifrats amb la clau del canal: comparteix-la només amb els teus i canvia-la si es filtra. Amb auriculars eviteu ecos entre mòbils propers.',
     key_lbl: 'Clau', invite: 'convida', leave: 'surt',
     disconnected: 'desconnectat', connecting: 'connectant…', online: 'en línia', transmitting: '● transmetent',
-    members: '{0} al canal', you: 'tu', alone: 'ningú més al canal · prem «convida»',
+    members: '{0}', you: 'tu', alone: 'ningú més al canal · prem «convida»',
     ptt_hold: 'MANTÉN PER PARLAR', ptt_tap: 'TOCA PER PARLAR', ptt_on: 'PARLANT', ptt_listen: 'NOMÉS ESCOLTES',
     sub_space: 'o la barra espaiadora', sub_release: 'deixa anar per escoltar', sub_tapstop: 'toca per deixar-ho', sub_rx: 'rebent…', sub_nomic: 'micròfon no disponible',
-    tap_mode: 'tocar en lloc de mantenir', beeps: 'pitets', vol: 'vol', replay: '⟲ repeteix l\'últim',
+    tap_mode: 'tocar en lloc de mantenir', beeps: 'pitets', vol: 'vol',
     alerts_lbl: 'Avisos amb la teva ubicació', al_pol: 'Policia', al_alt: 'Aldarull', al_sos: 'SOS', al_loc: 'Sóc aquí',
     n_pol: 'PRESÈNCIA POLICIAL', n_alt: 'ALDARULL', n_sos: 'SOS', n_loc: 'UBICACIÓ',
     cancel_n: '✕ Cancel·la · {0}', locating: 'Ubicant…', sent_to: 'Enviat a {0}', sent_none: 'Enviat · ningú més connectat ara',
@@ -381,11 +387,10 @@ const I = {
     chat_title: 'Xat del canal', chat_ph: 'Escriu un missatge…', chat_empty: 'Entra en un canal per parlar i xatejar.',
     q1: '👍 Tot bé', q2: '🏃 Vinc cap allà', q3: '🙋 Necessito relleu', q4: '💧 Falta aigua', q5: '📣 Veniu al piquet',
     tab_radio: 'Ràdio', tab_chat: 'Xat',
-    foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. No es guarda historial: només veus el que arriba mentre ets dins.',
+    foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. L\'àudio no es grava ni es guarda enlloc: sona i desapareix.',
     inv_title: 'Convidar al canal', inv_scan: 'Que escanegin aquest codi amb la càmera del mòbil', inv_share: 'Comparteix l\'enllaç', inv_copy: 'Copia l\'enllaç', inv_copied: 'Enllaç copiat',
     wipe: 'Sortir i esborrar les meves dades', audio_on: 'Toca per activar l\'àudio',
     in_chan: 'Al canal {0} com a {1}', joined_peer: '{0} entra al canal', left_peer: '{0} surt del canal', lost_peer: '{0} sense senyal', left_chan: 'Has sortit del canal', wiped: 'Dades esborrades',
-    voice: '🎙 {0} s',
     err_mic: 'Sense micròfon: només escoltes ({0})', err_https: 'Cal HTTPS per xifrar. Obre la pàgina per https://', err_join: 'No s\'ha pogut entrar: {0}',
     offline_tx: 'Sense connexió: no es pot transmetre', cut: 'Tall automàtic als {0} s', wait: 'Espera uns segons abans de repetir l\'avís'
   }
@@ -545,9 +550,10 @@ const S = {
   id: null, idHex: '',
   clients: [], peers: new Map(),
   ctx: null, master: null, mic: null, cap: null, micOk: false,
-  tx: false, txId: 0, seq: 0, enc: null, own: [], txTimer: 0,
+  tx: false, txId: 0, seq: 0, enc: null, txTimer: 0,
   timers: [], presT: 0, wake: null,
-  outbox: [], pos: null, geoOk: false, lastPcm: null, unread: 0
+  outbox: [], pos: null, geoOk: false, unread: 0,
+  out: 'spk', boost: null, comp: null
 };
 const seen = new Set(), seenQ = [];
 const BASE_TITLE = document.title;
@@ -563,21 +569,14 @@ function feedAdd(li, force) {
 }
 function log(text, opts = {}) {
   const li = document.createElement('div');
-  const kind = opts.pcm ? 'voice' : opts.who ? 'msg' : 'sys';
+  const kind = opts.who ? 'msg' : 'sys';
   li.className = 'li ' + kind + (opts.mine ? ' mine' : '') + (opts.cls ? ' ' + opts.cls : '');
   if (kind === 'sys') li.textContent = text;
   else {
     if (opts.who && !opts.mine) { const w = document.createElement('span'); w.className = 'who'; w.textContent = opts.who; li.append(w); }
-    if (opts.pcm) {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = '▶';
-      b.onclick = () => playPcm(opts.pcm);
-      const x = document.createElement('span'); x.className = 'x'; x.textContent = text;
-      li.append(b, x);
-    } else {
-      const x = document.createElement('span'); x.textContent = text;
-      const ts = document.createElement('span'); ts.className = 'ts'; ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      li.append(x, ts);
-    }
+    const x = document.createElement('span'); x.textContent = text;
+    const ts = document.createElement('span'); ts.className = 'ts'; ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    li.append(x, ts);
   }
   feedAdd(li, opts.mine);
   return li;
@@ -658,11 +657,6 @@ function playAt(pcm, when, prev) {
   const src = S.ctx.createBufferSource();
   src.buffer = buf; src.connect(S.master); src.start(when);
 }
-function playPcm(pcm) {
-  if (!S.ctx || !pcm) return;
-  S.ctx.resume();
-  playAt(pcm, S.ctx.currentTime + 0.05, 0);
-}
 function beep(freqs, when, vol = 0.18) {
   if (!S.ctx || !$('beepTgl').checked) return;
   let t0 = Math.max(when || 0, S.ctx.currentTime);
@@ -683,7 +677,10 @@ async function initAudio() {
     S.ctx = new AC({ latencyHint: 'interactive' });
     const lp = S.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7000;
     S.master = S.ctx.createGain(); S.master.gain.value = +$('vol').value;
-    S.master.connect(lp).connect(S.ctx.destination);
+    S.boost = S.ctx.createGain();                                   // refuerzo del modo altavoz
+    S.comp = S.ctx.createDynamicsCompressor();                      // evita que el refuerzo sature
+    S.comp.threshold.value = -14; S.comp.knee.value = 12; S.comp.attack.value = 0.003; S.comp.release.value = 0.2;
+    S.master.connect(S.boost).connect(S.comp).connect(lp).connect(S.ctx.destination);
     S.ctx.onstatechange = checkAudio;
   }
   await S.ctx.resume().catch(() => {});
@@ -712,6 +709,32 @@ async function initMic() {
   }
 }
 
+/* ---------- salida de audio: auricular / altavoz ---------- */
+// Los navegadores no tienen un interruptor estándar: se combinan tres técnicas y se informa de cuál ha funcionado.
+const SPK_RE = /speaker|altavoz|altaveu|loud|manos libres|hands.?free/i;
+const EAR_RE = /earpiece|receiver|handset|auricular|tel[eé]fono|telephone|phone/i;
+function sessionType() { return S.out === 'spk' && !S.tx ? 'playback' : 'play-and-record'; }
+function syncSession() {                    // iPhone/Safari: «playback» suena por el altavoz; «play-and-record» por el auricular
+  try { if (navigator.audioSession) { navigator.audioSession.type = sessionType(); return true; } } catch {}
+  return false;
+}
+async function applyOutput(announce) {
+  const spk = S.out === 'spk';
+  if (S.boost) { S.boost.gain.value = spk ? 1.8 : 1; S.comp.ratio.value = spk ? 8 : 1; }
+  let routed = syncSession();
+  try {                                     // Chrome/Edge/Android: elegir el dispositivo de salida si el navegador lo ofrece
+    if (S.ctx && typeof S.ctx.setSinkId === 'function' && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      const outs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput');
+      const pick = outs.find(d => (spk ? SPK_RE : EAR_RE).test(d.label));
+      if (pick) { await S.ctx.setSinkId(pick.deviceId); routed = true; }
+      else if (outs.length) await S.ctx.setSinkId('');
+    }
+  } catch {}
+  $('outBtn').textContent = L(spk ? 'out_spk' : 'out_ear');
+  $('outBtn').classList.toggle('loud', spk);
+  if (announce) log(L(spk ? (routed ? 'out_spk_ok' : 'out_spk_lim') : (routed ? 'out_ear_ok' : 'out_ear_lim')), {});
+}
+
 /* ---------- transmisión ---------- */
 function onCap(e) {
   const d = e.data;
@@ -720,12 +743,7 @@ function onCap(e) {
   if (d.end) {
     sendFrame(null, 1);
     micEnable(false);
-    if (S.own.length) {
-      const all = new Int16Array(S.own.length * FRAME);
-      S.own.forEach((c, i) => all.set(c, i * FRAME));
-      log(L('voice', (S.own.length * FRAME_S).toFixed(1)), { pcm: all, mine: true });
-    }
-    S.own = [];
+    syncSession();
   }
 }
 function sendFrame(pcm, last) {
@@ -734,7 +752,7 @@ function sendFrame(pcm, last) {
   head[5] = S.txId; head[6] = S.seq >> 8; head[7] = S.seq & 255;
   head[8] = (S.enc.p >> 8) & 255; head[9] = S.enc.p & 255; head[10] = S.enc.i; head[11] = last;
   let body = new Uint8Array(0);
-  if (pcm) { body = adpcmEnc(pcm, S.enc); S.own.push(pcm); S.seq++; }
+  if (pcm) { body = adpcmEnc(pcm, S.enc); S.seq++; }
   publish(cat([head, body]));
 }
 async function publish(plain) {
@@ -746,8 +764,9 @@ function startTx() {
   if (!S.joined || !S.micOk || S.tx) return;
   if (!S.clients.some(c => c.up)) { log(L('offline_tx'), { cls: 'err' }); vibe([60, 40, 60]); return; }
   S.ctx.resume();
+  S.tx = true; syncSession();               // para grabar, el iPhone necesita la sesión «play-and-record»
   micEnable(true);
-  S.tx = true; S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 }; S.own = [];
+  S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 };
   S.cap.port.postMessage({ on: 1 });
   beep([1200]);
   vibe(25);
@@ -845,18 +864,18 @@ function onAudio(pt) {
   if (tx === p.doneTx) return;
   let st = p.rx;
   if (st && st.tx !== tx) { finishRx(p); st = null; }
-  if (!st) st = p.rx = { tx, base: null, chunks: [], max: -1, endAt: 0, prev: 0 };
+  if (!st) st = p.rx = { tx, base: null, got: new Set(), max: -1, endAt: 0, prev: 0 };
   if (pt.length > 12) {
     const pcm = adpcmDec(pt.subarray(12), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
     const now = S.ctx.currentTime;
     if (st.base === null) st.base = now + JITTER_S - seq * FRAME_S;
     let when = st.base + seq * FRAME_S;
     if (when < now + 0.01 && seq > st.max) { st.base = now + JITTER_S - seq * FRAME_S; when = st.base + seq * FRAME_S; }
-    if (when >= now + 0.01 && !st.chunks[seq]) {
+    if (when >= now + 0.01 && !st.got.has(seq)) {
       playAt(pcm, when, seq === st.max + 1 ? st.prev : 0);
       st.endAt = Math.max(st.endAt, when + FRAME_S);
     }
-    if (!st.chunks[seq]) st.chunks[seq] = pcm;
+    st.got.add(seq);
     if (seq > st.max) { st.max = seq; st.prev = pcm[pcm.length - 1]; }
     let pk = 0; for (let i = 0; i < pcm.length; i += 16) { const a = Math.abs(pcm[i]); if (a > pk) pk = a; }
     if (!S.tx) meter(pk / 32768);
@@ -871,14 +890,7 @@ function finishRx(p) {
   p.rx = null; p.doneTx = st.tx;
   clearTimeout(p.tmo);
   setTimeout(() => { if (p.doneTx === st.tx) p.doneTx = -1; }, 3000);
-  const n = st.max + 1;
-  if (n > 0) {
-    const all = new Int16Array(n * FRAME);
-    for (let i = 0; i < n; i++) if (st.chunks[i]) all.set(st.chunks[i], i * FRAME);
-    S.lastPcm = all;
-    log(L('voice', (n * FRAME_S).toFixed(1)) + ' · ' + p.nick, { pcm: all, who: p.nick });
-    beep([900, 600], st.endAt + 0.03);
-  }
+  if (st.max >= 0) beep([900, 600], st.endAt + 0.03);     // el audio no se guarda: suena y se descarta
   const wait = Math.max(0, (st.endAt - S.ctx.currentTime) * 1000);
   setTimeout(() => { if (!p.rx) { p.talk = false; if (!S.tx) meter(0); render(); } }, wait);
 }
@@ -964,7 +976,8 @@ function showAlert(k, nick, pos, mine, aid, ageMs, opts = {}) {
   // entrada permanente en el chat
   const li = document.createElement('div'); li.className = 'li alert ' + k;
   if (aid) li.dataset.aid = aid;
-  li.append(A.ico + ' ' + name + ' · ' + (mine ? L('you') : nick) + ' · ' + hhmm + ago);
+  li.append(A.ico + ' ' + name + ' · ');
+  const who = document.createElement('b'); who.textContent = mine ? L('you') : nick; li.append(who, ' · ' + hhmm + ago);
   if (pos) { const l = document.createElement('a'); l.href = osmUrl(pos); l.target = '_blank'; l.rel = 'noopener'; l.textContent = L('see_map'); li.append(l); }
   else li.append(' · ' + L('noloc'));
   feedAdd(li, mine);
@@ -978,9 +991,14 @@ function showAlert(k, nick, pos, mine, aid, ageMs, opts = {}) {
   const tb = document.createElement('div'); tb.className = 'tb';
   const b = document.createElement('b'); b.textContent = A.ico + ' ' + name;
   const s1 = document.createElement('span');
-  if (mine) s1.textContent = opts.queued ? L('sent_q') : S.peers.size ? L('sent_to', S.peers.size) : L('sent_none');
-  else s1.textContent = nick + ' · ' + hhmm + ago;
-  tb.append(b, s1);
+  if (mine) {
+    s1.textContent = opts.queued ? L('sent_q') : S.peers.size ? L('sent_to', S.peers.size) : L('sent_none');
+    tb.append(b, s1);
+  } else {
+    const al = document.createElement('span'); al.className = 'alias'; al.textContent = '👤 ' + nick;   // quién avisa
+    s1.textContent = hhmm + ago;
+    tb.append(b, al, s1);
+  }
   if (pos) {
     const s2 = document.createElement('span');
     const dl = document.createElement('span');
@@ -1078,11 +1096,13 @@ function render() {
   if (!S.joined) st.textContent = L('disconnected');
   else if (S.tx) { st.textContent = L('transmitting'); st.classList.add('tx'); }
   else if (talkers.length) { st.textContent = '◉ ' + talkers.map(p => p.nick).join(', '); st.classList.add('rx'); }
-  else if (up) { st.textContent = L('online') + ' · ' + up + '/' + S.clients.length; st.classList.add('on'); }
+  else if (up) { st.textContent = L('online'); st.classList.add('on'); }
   else st.textContent = L('connecting');
   $('netBanner').hidden = !(S.joined && up === 0);
   if (!S.joined) return;
   $('count').textContent = '👥 ' + L('members', S.peers.size + 1);
+  $('outBtn').textContent = L(S.out === 'spk' ? 'out_spk' : 'out_ear');
+  $('outBtn').classList.toggle('loud', S.out === 'spk');
 
   ptt.classList.toggle('tx', S.tx);
   ptt.classList.toggle('rx', !S.tx && talkers.length > 0);
@@ -1144,6 +1164,7 @@ async function join() {
     store.set('w.nick', S.nick); store.set('w.chan', chan);
     await initAudio();
     if (!S.cap) await initMic(); else S.micOk = true;
+    applyOutput(false);
     getPos(60000, 10000);                       // pide el permiso de ubicación ahora, con calma, no en plena emergencia
     const k = await deriveKeys(chan);
     S.key = k.key; S.topic = k.topic; S.chan = chan;
@@ -1230,7 +1251,8 @@ $('invShare').onclick = shareInvite;
 $('invCopy').onclick = copyInvite;
 $('langBtn').onclick = () => { lang = lang === 'es' ? 'ca' : 'es'; store.set('w.lang', lang); applyLang(); };
 $('themeBtn').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-$('replayBtn').onclick = () => playPcm(S.lastPcm);
+$('outBtn').onclick = () => { S.out = S.out === 'spk' ? 'ear' : 'spk'; store.set('w.out', S.out); vibe(20); applyOutput(true); };
+if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', () => { if (S.joined) applyOutput(false); });
 $('vol').oninput = e => { if (S.master) S.master.gain.value = +e.target.value; store.set('w.vol', e.target.value); };
 $('beepTgl').onchange = e => store.set('w.beep', e.target.checked ? '1' : '0');
 $('tapTgl').onchange = e => { stopTx(); store.set('w.tap', e.target.checked ? '1' : '0'); render(); };
@@ -1284,6 +1306,7 @@ $('nick').value = store.get('w.nick') || '';
 $('vol').value = store.get('w.vol') || '1';
 $('beepTgl').checked = store.get('w.beep') !== '0';
 $('tapTgl').checked = store.get('w.tap') === '1';
+S.out = store.get('w.out') === 'ear' ? 'ear' : 'spk';
 setTheme(document.documentElement.dataset.theme || 'light');
 applyLang();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
