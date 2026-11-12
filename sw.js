@@ -1,5 +1,5 @@
 // Service worker: la app abre aunque no haya cobertura (red primero, caché de respaldo)
-const V = 'w-v4';
+const V = 'w-33646bf94917';
 const FILES = ['./', 'index.html', 'qr.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'favicon.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
