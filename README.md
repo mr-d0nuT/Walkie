@@ -47,3 +47,7 @@ Son archivos estáticos: sirve cualquier hosting (Cloudflare Pages, Netlify…).
 - **iPhone**: hace falta iOS 16.4 o superior para elegir altavoz/auricular y para que suene con el interruptor de silencio puesto. En iPhone el micrófono queda abierto pero mudo mientras estás en el canal (así Safari no pregunta el permiso en cada pulsación), y al hablar hay un instante de espera hasta el pitido. Para tener la app a pantalla completa: Compartir → Añadir a pantalla de inicio.
 - Móviles muy juntos pueden hacer eco entre sí: mejor con auriculares.
 - Quien tenga la clave del canal ve los avisos y las ubicaciones: compártela solo con gente de confianza.
+
+## Autoría
+
+Obra original de mr-d0nuT. Todos los derechos reservados; no se concede licencia de uso ni de copia. Detalles y pruebas en [AUTORIA.md](AUTORIA.md).

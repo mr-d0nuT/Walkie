@@ -1,0 +1,19 @@
+MANIFIESTO DE AUTORÍA — Walkie (11N Vaga General · Walkie-Talkie)
+Fecha de este manifiesto (UTC): 2026-11-12T08:16:50Z
+Repositorio original: github.com/mr-d0nuT/Walkie (titular: mr-d0nuT)
+Primer commit: f43001caa6a0d0c08ef19ae14a832d3edd267464 2026-11-10 16:06:36 +0100
+Commit sellado: 3e836de396b85094997c7bc74e35a72536570bf9
+Árbol git:      eec59685a7a994b92ba1618ff4d894a8fbb84bb1
+Huella de autoría (compromiso SHA-256 de una frase secreta en poder del autor): 33646bf949171f60bcd4be754786df5f4a8f31c73e4d98660431e593153dcf7b
+SHA-256 de los archivos en ese commit:
+  4281026e11a06104eeb4d3c8b2e1a9ad532219fdfe7e7fa39ec5b8778e64ffa8  index.html
+  5c3d0851f2842c2deb9be946c40f3812ec4f71f01bddc114bc56fc2d55fba7e3  sw.js
+  18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780  qr.js
+  1120f7deb3756469d936a8d631bcc7bab4f61aa31ac169e300b5fd8463d44b7d  manifest.webmanifest
+  e2c470cc378621ee84cde7cb1d8c7c1ce2971fea78208be6c5792b1376bfd703  logo.png
+  8afb019be6d9cda88fa440056f66b2c6f1b049ff7d7924f1b68a6eb6b193c703  icon-192.png
+  778fac13562e9a352ccc65085e80651e93c517c46666e5b04a70bf064075ce6b  icon-512.png
+  8373a5b78293422eff91f9420bcfd942d8ff956862265dcef71e1c03813bdfb3  favicon.png
+  1bb7d34fed8d6d03902a9e0dcf45da59789b4152986847d3012ebaff5793ece2  apple-touch-icon.png
+  5b51fd9f9a79c7d43677e688d20ff4dc28526c27ddb9b04b19cbfbaa674c691f  README.md
+  9462cf4418ff9ffcba0afccdd061a606c7740ae97f4639da8fcc2ec8b7193289  _headers
