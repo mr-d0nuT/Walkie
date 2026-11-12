@@ -124,7 +124,8 @@ input[type=text]:focus{border-color:var(--red)}
 @keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .al.arm{outline:3px solid #f5b301;outline-offset:2px}
 .al:disabled{opacity:.7}
-.wipe{display:block;margin:16px auto 0;background:none;border:0;color:var(--mut);font-size:12px;text-decoration:underline;cursor:pointer;padding:8px}
+.icob{padding:10px 11px;font-size:17px;line-height:1}
+.chanbtns .mini{padding-left:12px;padding-right:12px}
 /* chat */
 .side{display:flex;flex-direction:column}
 .sidetitle{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -247,7 +248,7 @@ input[type=text]:focus{border-color:var(--red)}
           </div>
           <div class="chanbtns">
             <button id="copyBtn" class="mini" type="button" data-i="invite"></button>
-            <button id="leaveBtn" class="mini danger" type="button" data-i="leave"></button>
+            <button id="wipeBtn" class="mini danger icob" type="button" data-ti="wipe" data-al="wipe">🗑️</button>
           </div>
         </div>
         <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div><button id="outBtn" class="mini outbtn" type="button" data-ti="out_title"></button></div>
@@ -273,7 +274,6 @@ input[type=text]:focus{border-color:var(--red)}
           <label class="tg vol"><span data-i="vol"></span><input type="range" id="vol" min="0" max="1.5" step="0.05" value="1"></label>
         </div>
 
-        <button id="wipeBtn" class="wipe" type="button" data-i="wipe"></button>
       </div>
     </section>
 
@@ -307,6 +307,18 @@ input[type=text]:focus{border-color:var(--red)}
       <button id="invShare" class="primary" type="button" style="margin-top:0" data-i="inv_share"></button>
       <button id="invCopy" class="mini" type="button" data-i="inv_copy"></button>
       <button id="invClose" class="mini" type="button" data-i="close"></button>
+    </div>
+  </div>
+</div>
+
+<div id="wipeSheet" class="sheet" hidden>
+  <div class="sheetbox" role="alertdialog" aria-modal="true">
+    <div style="font-size:40px;line-height:1;margin-bottom:8px">🗑️</div>
+    <h2 data-i="wipe_q"></h2>
+    <p data-i="wipe_d"></p>
+    <div class="btns">
+      <button id="wipeYes" class="primary" type="button" style="margin-top:0" data-i="wipe_yes"></button>
+      <button id="wipeNo" class="mini" type="button" data-i="cancel"></button>
     </div>
   </div>
 </div>
@@ -379,7 +391,7 @@ const I = {
     tab_radio: 'Radio', tab_chat: 'Chat',
     foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. El audio no se graba ni se guarda en ningún sitio: suena y desaparece.',
     inv_title: 'Invitar al canal', inv_scan: 'Que escaneen este código con la cámara del móvil', inv_share: 'Compartir enlace', inv_copy: 'Copiar enlace', inv_copied: 'Enlace copiado',
-    wipe: 'Salir y borrar mis datos', audio_on: '🔊 Toca aquí para activar el audio',
+    wipe: 'Salir y borrar mis datos', wipe_q: '¿Salir y borrar tus datos de este móvil?', wipe_d: 'Se borran la clave del canal y tu nombre. No se puede deshacer.', wipe_yes: 'Sí, salir y borrar', cancel: 'Cancelar', audio_on: '🔊 Toca aquí para activar el audio',
     in_chan: 'En el canal {0} como {1}', joined_peer: '{0} entra en el canal', left_peer: '{0} sale del canal', lost_peer: '{0} sin señal', left_chan: 'Has salido del canal', wiped: 'Datos borrados',
     err_mic: 'Sin micrófono: solo escuchas ({0})', err_https: 'Hace falta HTTPS para cifrar. Abre la página por https://', err_join: 'No se pudo entrar: {0}',
     offline_tx: 'Sin conexión: no se puede transmitir', cut: 'Corte automático a los {0} s', wait: 'Espera unos segundos antes de repetir el aviso'
@@ -411,7 +423,7 @@ const I = {
     tab_radio: 'Ràdio', tab_chat: 'Xat',
     foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. L\'àudio no es grava ni es guarda enlloc: sona i desapareix.',
     inv_title: 'Convidar al canal', inv_scan: 'Que escanegin aquest codi amb la càmera del mòbil', inv_share: 'Comparteix l\'enllaç', inv_copy: 'Copia l\'enllaç', inv_copied: 'Enllaç copiat',
-    wipe: 'Sortir i esborrar les meves dades', audio_on: '🔊 Toca aquí per activar l\'àudio',
+    wipe: 'Sortir i esborrar les meves dades', wipe_q: 'Sortir i esborrar les teves dades d\'aquest mòbil?', wipe_d: 'S\'esborren la clau del canal i el teu nom. No es pot desfer.', wipe_yes: 'Sí, sortir i esborrar', cancel: 'Cancel·la', audio_on: '🔊 Toca aquí per activar l\'àudio',
     in_chan: 'Al canal {0} com a {1}', joined_peer: '{0} entra al canal', left_peer: '{0} surt del canal', lost_peer: '{0} sense senyal', left_chan: 'Has sortit del canal', wiped: 'Dades esborrades',
     err_mic: 'Sense micròfon: només escoltes ({0})', err_https: 'Cal HTTPS per xifrar. Obre la pàgina per https://', err_join: 'No s\'ha pogut entrar: {0}',
     offline_tx: 'Sense connexió: no es pot transmetre', cut: 'Tall automàtic als {0} s', wait: 'Espera uns segons abans de repetir l\'avís'
@@ -428,6 +440,7 @@ function applyLang() {
   qsa('[data-i]').forEach(e => { e.textContent = L(e.dataset.i); });
   qsa('[data-pl]').forEach(e => { e.placeholder = L(e.dataset.pl); });
   qsa('[data-ti]').forEach(e => { e.title = L(e.dataset.ti); });
+  qsa('[data-al]').forEach(e => { e.setAttribute('aria-label', L(e.dataset.al)); });
   qsa('.al').forEach(b => { b.querySelector('.tx').textContent = L('al_' + b.dataset.k); b.setAttribute('aria-label', L('al_' + b.dataset.k)); });
   $('langBtn').textContent = lang === 'es' ? 'CA' : 'ES';
   const q = $('quick'); q.textContent = '';
@@ -1452,8 +1465,10 @@ $('newChan').onclick = () => { $('chan').value = randomKey(16); updCount(); };
 $('joinBtn').onclick = join;
 $('nick').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
 $('chan').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
-$('leaveBtn').onclick = leave;
-$('wipeBtn').onclick = wipe;
+$('wipeBtn').onclick = () => { $('wipeSheet').hidden = false; };
+$('wipeNo').onclick = () => { $('wipeSheet').hidden = true; };
+$('wipeYes').onclick = () => { $('wipeSheet').hidden = true; wipe(); };
+$('wipeSheet').addEventListener('click', e => { if (e.target === $('wipeSheet')) $('wipeSheet').hidden = true; });
 $('chatForm').addEventListener('submit', e => {
   e.preventDefault();
   const inp = $('chatIn'); sendChatText(inp.value); inp.value = '';
@@ -1490,7 +1505,7 @@ ptt.addEventListener('click', e => e.preventDefault());
 
 const typing = e => (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox' && e.target.type !== 'range') || (e.target.tagName === 'BUTTON' && e.target.id !== 'ptt');
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') $('inviteSheet').hidden = true;
+  if (e.key === 'Escape') { $('inviteSheet').hidden = true; $('wipeSheet').hidden = true; }
   if (e.code !== 'Space' || !S.joined || typing(e)) return;
   e.preventDefault();
   if (e.repeat) return;
