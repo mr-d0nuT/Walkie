@@ -1,11 +1,10 @@
 # Autoría
 
-**Walkie (11N Vaga General · Walkie-Talkie)** es una obra original de **mr-d0nuT**, publicada por primera vez en
+**mr_dOnuT WALKIE-TALKIE** (antes «Walkie · 11N Vaga General») es una obra original de **mr-d0nuT**, publicada por primera vez en
 `github.com/mr-d0nuT/Walkie` el 10 de noviembre de 2026.
 
 © 2026 mr-d0nuT. **Todos los derechos reservados.** Este repositorio no concede ninguna licencia: no se permite copiar,
 modificar, redistribuir ni desplegar este código, entero o en parte, sin permiso escrito del autor.
-El logotipo pertenece a sus respectivos titulares.
 
 ## Pruebas de autoría
 

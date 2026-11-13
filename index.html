@@ -5,14 +5,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#c8202a">
+<meta name="theme-color" content="#d7261d">
 <meta name="walkie-origin" content="sha256:33646bf949171f60bcd4be754786df5f4a8f31c73e4d98660431e593153dcf7b">
-<meta name="description" content="11N Vaga General · Walkie-talkie y chat en el navegador. Sin cuenta, sin registro, todo cifrado.">
+<meta name="description" content="mr_dOnuT WALKIE-TALKIE · Walkie-talkie y chat en el navegador. Sin cuenta, sin registro, todo cifrado.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="11N Walkie">
+<meta name="apple-mobile-web-app-title" content="Walkie-Talkie">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>11N Vaga General · Walkie-Talkie</title>
+<title>mr_dOnuT WALKIE-TALKIE</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -41,11 +41,11 @@ button{touch-action:manipulation}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 2px 14px var(--shadow)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand img{width:44px;height:44px;flex:none;display:block;border-radius:10px}
+.brand img{width:44px;height:44px;flex:none;display:block;border-radius:12px;box-shadow:0 3px 10px #c8202a40}
 .brandtxt{min-width:0;line-height:1.1}
-.brandtxt b{display:block;font-weight:800;font-size:16px;white-space:nowrap}
-.brandtxt b i{font-style:normal;color:var(--acc)}
-.tag{font-size:10.5px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase}
+.brandtxt b{display:block;font-weight:900;font-size:19px;letter-spacing:-.01em;white-space:nowrap}
+.brandtxt b i,.wm i{font-style:normal;color:#e58a22}
+.tag{font-size:10px;font-weight:700;letter-spacing:.22em;color:var(--mut);text-transform:uppercase}
 .topr{display:flex;gap:6px;flex:none}
 .ib{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-size:15px;font-weight:700;cursor:pointer}
 .netb{background:#f5a524;color:#1b1300;font-weight:700;font-size:13px;text-align:center;padding:9px 12px;border-radius:12px;margin-bottom:12px}
@@ -63,7 +63,17 @@ button{touch-action:manipulation}
 .outbtn{flex:none;min-height:38px;padding:7px 12px;font-size:13px}
 .outbtn.loud{background:var(--dark);border-color:var(--dark);color:#fff}
 .statusrow .state{flex:1}
-.hero{display:block;width:min(52%,210px);height:auto;margin:0 auto 2px}
+.hero{display:flex;flex-direction:column;align-items:center;margin:32px 0 6px}
+.heroart{position:relative;width:min(44vw,168px,24vh);aspect-ratio:1;margin-bottom:32px}
+.herodisc{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 34% 26%,#f25043,#d0241a 52%,#8e100b);box-shadow:0 16px 34px #c8202a59,inset 0 -10px 22px #00000038,inset 0 2px 0 #ffffff40}
+.herodisc img{position:absolute;left:50%;top:9%;width:74%;height:auto;transform:translateX(-47%);filter:drop-shadow(0 8px 10px #5a060480)}
+.ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--red);opacity:0;animation:ping 3s cubic-bezier(.2,.6,.3,1) infinite;pointer-events:none}
+.ring.r2{animation-delay:1s}.ring.r3{animation-delay:2s}
+@keyframes ping{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.34);opacity:0}}
+@media(prefers-reduced-motion:reduce){.ring{animation:none}}
+.wm{font-weight:900;font-size:34px;letter-spacing:-.02em;line-height:1}
+.wmtag{margin-top:7px;font-size:12px;font-weight:800;letter-spacing:.34em;padding-left:.34em;text-transform:uppercase;color:var(--mut)}
+input.bad{border-color:var(--acc)!important}
 .lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
 .alertslbl{margin:10px 0 6px}
 .row{display:flex;gap:8px}
@@ -224,8 +234,8 @@ input[type=text]:focus{border-color:var(--red)}
 <div id="app" class="app" data-tab="radio">
   <header class="top">
     <div class="brand">
-      <img src="icon-192.png" alt="11N" width="44" height="44">
-      <div class="brandtxt"><b><i>VAGA</i> GENERAL</b><span class="tag">walkie-talkie</span></div>
+      <img src="icon-192.png" alt="" width="44" height="44">
+      <div class="brandtxt"><b>mr_d<i>O</i>nuT</b><span class="tag">walkie-talkie</span></div>
     </div>
     <div class="topr">
       <button id="langBtn" class="ib" type="button" aria-label="Idioma / Llengua">CA</button>
@@ -238,7 +248,11 @@ input[type=text]:focus{border-color:var(--red)}
     <section id="radio" class="pane card">
       <div id="audioBanner" class="banner" hidden><button id="audioBtn" type="button" data-i="audio_on"></button></div>
       <div id="joinPanel">
-        <img class="hero" src="logo.png" alt="11N Vaga General · Walkie-Talkie" width="640" height="640">
+        <div class="hero" role="img" aria-label="mr_dOnuT WALKIE-TALKIE">
+          <div class="heroart"><span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span><div class="herodisc"><img src="donut.webp" alt="" width="570" height="760"></div></div>
+          <div class="wm">mr_d<i>O</i>nuT</div>
+          <div class="wmtag">Walkie-Talkie</div>
+        </div>
         <label class="lbl" for="chan" data-i="chan_lbl"></label>
         <div class="row">
           <input type="text" class="mono" id="chan" maxlength="20" spellcheck="false" autocomplete="off" autocapitalize="characters" data-pl="chan_ph">
@@ -246,7 +260,8 @@ input[type=text]:focus{border-color:var(--red)}
         </div>
         <div id="chanCount" class="cnt"></div>
         <label class="lbl" for="nick" data-i="nick_lbl"></label>
-        <input type="text" id="nick" maxlength="14" spellcheck="false" autocomplete="off" data-pl="nick_ph">
+        <input type="text" id="nick" maxlength="14" spellcheck="false" autocomplete="off" data-pl="nick_ph" required>
+        <div id="nickErr" class="cnt bad" hidden data-i="nick_req"></div>
         <button id="joinBtn" class="primary" type="button" data-i="join"></button>
         <p class="hint" data-i="hint"></p>
       </div>
@@ -384,7 +399,7 @@ const I = {
     out_spk_lim: 'Altavoz: el micrófono solo se abre al hablar y el volumen va reforzado. Sube el volumen de medios del móvil.',
     out_ear_lim: 'Auricular: modo llamada, suena más bajo. Usa el volumen de llamada del móvil.',
     chan_lbl: 'Clave de canal', chan_ph: 'CLAVE LARGA', newkey: 'Clave aleatoria', chan_cnt: '{0} / 20 · mínimo 10',
-    nick_lbl: 'Tu nombre', nick_ph: 'Tu nombre (opcional)', join: 'Entrar en el canal', joining: 'Entrando…',
+    nick_lbl: 'Tu nombre (obligatorio)', nick_ph: 'Tu nombre o alias', nick_req: 'Escribe tu nombre para entrar (mínimo 2 caracteres).', join: 'Entrar en el canal', joining: 'Entrando…',
     hint: 'Sin cuenta, sin email, sin número. Voz, mensajes y avisos van cifrados con la clave del canal: compártela solo con los tuyos y cámbiala si se filtra. Con auriculares evitas ecos entre móviles cercanos.',
     key_lbl: 'Clave', invite: 'invitar', leave: 'salir',
     disconnected: 'desconectado', connecting: 'conectando…', online: 'en línea', transmitting: '● transmitiendo',
@@ -417,7 +432,7 @@ const I = {
     out_spk_lim: 'Altaveu: el micròfon només s\'obre en parlar i el volum va reforçat. Puja el volum de multimèdia del mòbil.',
     out_ear_lim: 'Auricular: mode trucada, sona més baix. Fes servir el volum de trucada del mòbil.',
     chan_lbl: 'Clau del canal', chan_ph: 'CLAU LLARGA', newkey: 'Clau aleatòria', chan_cnt: '{0} / 20 · mínim 10',
-    nick_lbl: 'El teu nom', nick_ph: 'El teu nom (opcional)', join: 'Entrar al canal', joining: 'Entrant…',
+    nick_lbl: 'El teu nom (obligatori)', nick_ph: 'El teu nom o àlies', nick_req: 'Escriu el teu nom per entrar (mínim 2 caràcters).', join: 'Entrar al canal', joining: 'Entrant…',
     hint: 'Sense compte, sense correu, sense número. Veu, missatges i avisos van xifrats amb la clau del canal: comparteix-la només amb els teus i canvia-la si es filtra. Amb auriculars eviteu ecos entre mòbils propers.',
     key_lbl: 'Clau', invite: 'convida', leave: 'surt',
     disconnected: 'desconnectat', connecting: 'connectant…', online: 'en línia', transmitting: '● transmetent',
@@ -897,7 +912,7 @@ function mediaSess(on) {                    // ficha en la pantalla de bloqueo; 
   if (!('mediaSession' in navigator)) return;
   try {
     if (on) {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: 'Walkie-Talkie', artist: L('ms_on'),
+      navigator.mediaSession.metadata = new MediaMetadata({ title: 'mr_dOnuT WALKIE-TALKIE', artist: L('ms_on'),
         artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] });
       navigator.mediaSession.playbackState = 'playing';
       for (const act of ['play', 'pause', 'stop']) navigator.mediaSession.setActionHandler(act, () => { if (keep.el && S.joined) keep.el.play().catch(() => {}); });
@@ -1397,7 +1412,7 @@ async function copyInvite() {
 async function shareInvite() {
   const url = inviteUrl();
   try {
-    if (navigator.share) await navigator.share({ title: '11N Vaga General · Walkie-Talkie', url });
+    if (navigator.share) await navigator.share({ title: 'mr_dOnuT WALKIE-TALKIE', url });
     else await copyInvite();
   } catch (e) { if (!e || e.name !== 'AbortError') copyInvite(); }
 }
@@ -1405,10 +1420,12 @@ async function shareInvite() {
 async function join() {
   const chan = cleanKey($('chan').value);
   if (chan.length < 10) { updCount(); $('chan').focus(); return; }
+  const nick = $('nick').value.trim().toUpperCase().slice(0, 14);
+  if (nick.length < 2) { $('nickErr').hidden = false; $('nick').classList.add('bad'); $('nick').focus(); vibe(60); return; }
   if (!window.crypto || !crypto.subtle) { log(L('err_https'), { cls: 'err' }); return; }
   const btn = $('joinBtn'); btn.disabled = true; btn.textContent = L('joining');
   try {
-    S.nick = ($('nick').value.trim().toUpperCase().slice(0, 14)) || '11N-' + (100 + Math.floor(Math.random() * 900));
+    S.nick = nick;
     $('nick').value = S.nick;
     store.set('w.nick', S.nick); store.set('w.chan', chan);
     await Promise.race([syncClock(), new Promise(r => setTimeout(r, 1500))]);
@@ -1484,7 +1501,7 @@ function setTheme(th) {
   document.documentElement.dataset.theme = th;
   store.set('w.theme', th);
   $('themeBtn').textContent = th === 'dark' ? '☀️' : '🌙';
-  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = th === 'dark' ? '#0d0f12' : '#c8202a';
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = th === 'dark' ? '#0d0f12' : '#d7261d';
 }
 
 /* ---------- segundo plano: informe al volver ---------- */
@@ -1508,6 +1525,7 @@ function bgReport() {
 
 /* ---------- eventos ---------- */
 $('chan').addEventListener('input', updCount);
+$('nick').addEventListener('input', () => { $('nickErr').hidden = true; $('nick').classList.remove('bad'); });
 $('newChan').onclick = () => { $('chan').value = randomKey(16); updCount(); };
 $('joinBtn').onclick = join;
 $('nick').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });

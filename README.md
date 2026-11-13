@@ -1,4 +1,4 @@
-# 11N Vaga General · Walkie-Talkie
+# mr_dOnuT WALKIE-TALKIE
 
 Walkie-talkie y chat en el navegador para piquetes y movilizaciones. Sin cuenta, sin registro, sin servidor propio y sin límite de usuarios en la app. En castellano y catalán.
 
@@ -8,7 +8,7 @@ Son archivos estáticos: sirve cualquier hosting (Cloudflare Pages, Netlify…).
 
 ## Uso (3 pasos)
 
-1. Abre el enlace (o escanea el QR de quien ya está dentro) y pulsa **Entrar en el canal**. El nombre es opcional.
+1. Abre el enlace (o escanea el QR de quien ya está dentro) y escribe tu nombre (obligatorio) y pulsa **Entrar en el canal**.
 2. **Invitar** muestra un QR y un enlace: quien lo escanee entra directo en tu canal, sin escribir claves.
 3. **Mantén el botón** para hablar y suelta para escuchar. Si no puedes mantenerlo (guantes, pancarta en la otra mano), activa «tocar en vez de mantener».
 

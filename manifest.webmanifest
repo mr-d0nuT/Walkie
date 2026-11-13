@@ -1,12 +1,29 @@
 {
-  "name": "11N Vaga General · Walkie-Talkie",
-  "short_name": "11N Walkie",
+  "name": "mr_dOnuT WALKIE-TALKIE",
+  "short_name": "Walkie-Talkie",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#c8202a",
+  "theme_color": "#d7261d",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "description": "Walkie-talkie y chat en el navegador. Sin cuenta, sin registro, todo cifrado."
 }
