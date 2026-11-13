@@ -23,7 +23,7 @@ Son archivos estáticos: sirve cualquier hosting (Cloudflare Pages, Netlify…).
 - **Mensajes rápidos** de un toque («Todo bien», «Voy para allá», «Necesito relevo»…) y chat normal. Avisos de no leídos en la pestaña.
 - **Modo oscuro** para la noche y **modo claro** para el sol; botones grandes y una sola mano.
 - **Salida de audio**: botón 🔊 Altavoz / 📞 Auricular junto al estado. Altavoz = manos libres con volumen reforzado; el micrófono solo se abre mientras hablas, así Android no pone el audio en «modo llamada» (que suena flojo). Auricular = modo llamada, privado, para pegar el móvil a la oreja.
-- **El audio no se graba ni se guarda**: suena y desaparece. No hay historial de voz.
+- **Por defecto el audio no se graba**: suena y desaparece. Cada persona puede activar **REC** en su móvil (botón redondo junto a «Altavoz»): entonces los mensajes de voz que envíe y reciba quedan en su pestaña de chat con ▶ para volver a oírlos. Las grabaciones están solo en la memoria de ese móvil (máximo 40) y se pierden al recargar o al salir. Quien no lo activa no guarda nada.
 - El audio se reactiva solo con cualquier toque en la pantalla; si el navegador lo duerme y hace falta, sale un aviso naranja arriba del todo.
 - El micrófono solo se activa mientras hablas. La pantalla se mantiene encendida mientras estás en el canal.
 - **Papelera 🗑️** (arriba, junto a «invitar»): es la forma de salir del canal. Pide confirmación y borra del móvil la clave del canal y el nombre.

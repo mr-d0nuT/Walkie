@@ -141,6 +141,14 @@ input[type=text]:focus{border-color:var(--red)}
 .li.mine .ts{color:#ffd9d9}
 .li.pend{opacity:.6}
 .li.pend .ts::after{content:" ⏳"}
+.recbtn{flex:none;width:42px;min-height:38px;padding:0;border-radius:50%;font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--mut)}
+.recbtn.on{background:#d90429;border-color:#d90429;color:#fff;animation:blink .9s infinite alternate}
+.li.voice{display:flex;align-items:center;gap:10px}
+.li.voice .x{font-weight:600}
+.li.voice .w{display:block;font-size:11px;font-weight:700;color:var(--acc)}
+.li.voice button{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--red);color:#fff;cursor:pointer;font-size:14px;padding-left:2px}
+.li.voice.mine button{background:#fff;color:var(--red)}
+.li.voice .ts{float:none;margin:0 0 0 auto}
 .li.sys{align-self:center;max-width:100%;background:none;color:var(--mut);font-size:12px;padding:2px 6px;text-align:center}
 .li.sys.err{color:var(--acc);font-weight:700}
 .li.alert{align-self:stretch;max-width:100%;color:#fff;border-radius:12px;font-weight:700}
@@ -254,7 +262,7 @@ input[type=text]:focus{border-color:var(--red)}
             <button id="wipeBtn" class="mini danger icob" type="button" data-ti="wipe" data-al="wipe">🗑️</button>
           </div>
         </div>
-        <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div><button id="outBtn" class="mini outbtn" type="button" data-ti="out_title"></button></div>
+        <div class="statusrow"><div id="state" class="state"></div><div id="count" class="count"></div><button id="outBtn" class="mini outbtn" type="button" data-ti="out_title"></button><button id="recBtn" class="mini recbtn" type="button" data-ti="rec_title" data-al="rec_title" aria-pressed="false">REC</button></div>
         <a id="lastAlert" class="lastal" hidden target="_blank" rel="noopener"></a>
         <div id="peers" class="peers"></div>
 
@@ -392,7 +400,8 @@ const I = {
     chat_title: 'Chat del canal', chat_ph: 'Escribe un mensaje…', chat_empty: 'Entra en un canal para hablar y chatear.',
     q1: '👍 Todo bien', q2: '🏃 Voy para allá', q3: '🙋 Necesito relevo', q4: '💧 Falta agua', q5: '📣 Venid al piquete',
     tab_radio: 'Radio', tab_chat: 'Chat',
-    foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. El audio no se graba ni se guarda en ningún sitio: suena y desaparece.',
+    foot: 'Sin servidor propio ni registro: voz, mensajes y avisos viajan cifrados (AES-GCM) con la clave del canal. Por defecto el audio no se graba: suena y desaparece. Si activas REC, se guarda solo en tu móvil y se borra al salir.',
+    rec_title: 'Grabar los mensajes de voz en el chat', rec_on: '⏺ Grabación activada: los mensajes de voz que envíes y recibas se guardan en el chat de este móvil hasta que salgas.', rec_off: 'Grabación desactivada: los nuevos mensajes de voz ya no se guardan.', voice: '🎙 {0} s',
     inv_title: 'Invitar al canal', inv_scan: 'Que escaneen este código con la cámara del móvil', inv_share: 'Compartir enlace', inv_copy: 'Copiar enlace', inv_copied: 'Enlace copiado',
     wipe: 'Salir y borrar mis datos', wipe_q: '¿Salir y borrar tus datos de este móvil?', wipe_d: 'Se borran la clave del canal y tu nombre. No se puede deshacer.', wipe_yes: 'Sí, salir y borrar', cancel: 'Cancelar', audio_on: '🔊 Toca aquí para activar el audio',
     in_chan: 'En el canal {0} como {1}', joined_peer: '{0} entra en el canal', left_peer: '{0} sale del canal', lost_peer: '{0} sin señal', left_chan: 'Has salido del canal', wiped: 'Datos borrados',
@@ -424,7 +433,8 @@ const I = {
     chat_title: 'Xat del canal', chat_ph: 'Escriu un missatge…', chat_empty: 'Entra en un canal per parlar i xatejar.',
     q1: '👍 Tot bé', q2: '🏃 Vinc cap allà', q3: '🙋 Necessito relleu', q4: '💧 Falta aigua', q5: '📣 Veniu al piquet',
     tab_radio: 'Ràdio', tab_chat: 'Xat',
-    foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. L\'àudio no es grava ni es guarda enlloc: sona i desapareix.',
+    foot: 'Sense servidor propi ni registre: veu, missatges i avisos viatgen xifrats (AES-GCM) amb la clau del canal. Per defecte l\'àudio no es grava: sona i desapareix. Si actives REC, es desa només al teu mòbil i s\'esborra en sortir.',
+    rec_title: 'Enregistrar els missatges de veu al xat', rec_on: '⏺ Enregistrament activat: els missatges de veu que enviïs i rebis es desen al xat d\'aquest mòbil fins que surtis.', rec_off: 'Enregistrament desactivat: els nous missatges de veu ja no es desen.', voice: '🎙 {0} s',
     inv_title: 'Convidar al canal', inv_scan: 'Que escanegin aquest codi amb la càmera del mòbil', inv_share: 'Comparteix l\'enllaç', inv_copy: 'Copia l\'enllaç', inv_copied: 'Enllaç copiat',
     wipe: 'Sortir i esborrar les meves dades', wipe_q: 'Sortir i esborrar les teves dades d\'aquest mòbil?', wipe_d: 'S\'esborren la clau del canal i el teu nom. No es pot desfer.', wipe_yes: 'Sí, sortir i esborrar', cancel: 'Cancel·la', audio_on: '🔊 Toca aquí per activar l\'àudio',
     in_chan: 'Al canal {0} com a {1}', joined_peer: '{0} entra al canal', left_peer: '{0} surt del canal', lost_peer: '{0} sense senyal', left_chan: 'Has sortit del canal', wiped: 'Dades esborrades',
@@ -597,6 +607,7 @@ const S = {
   timers: [], presT: 0, wake: null,
   outbox: [], pos: null, geoOk: false, unread: 0,
   out: 'spk', boost: null, comp: null, lp: null,
+  rec: false, own: [], recs: [], playing: null,
   skew: 0, joinAt: 0, last: null, txStart: 0, txIv: 0, ka: null, kd: null
 };
 const seen = new Set(), seenQ = [];
@@ -710,6 +721,25 @@ function playAt(pcm, when, prev) {
   buf.getChannelData(0).set(f);
   const src = S.ctx.createBufferSource();
   src.buffer = buf; src.connect(S.master); src.start(when);
+  return src;
+}
+function playPcm(pcm) {                     // volver a escuchar una grabación (corta la que estuviera sonando)
+  if (!S.ctx || !pcm) return;
+  S.ctx.resume();
+  try { if (S.playing) S.playing.stop(); } catch {}
+  S.playing = playAt(pcm, S.ctx.currentTime + 0.05, 0);
+}
+function logVoice(nick, pcm, mine) {        // solo si este usuario tiene REC activado
+  const li = document.createElement('div'); li.className = 'li voice' + (mine ? ' mine' : '');
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = '▶'; b.onclick = () => playPcm(pcm);
+  const x = document.createElement('span'); x.className = 'x';
+  if (!mine) { const w = document.createElement('span'); w.className = 'w'; w.textContent = nick; x.append(w); }
+  x.append(L('voice', (pcm.length / RATE).toFixed(1)));
+  const ts = document.createElement('span'); ts.className = 'ts'; ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  li.append(b, x, ts);
+  feedAdd(li, mine);
+  S.recs.push(li);
+  while (S.recs.length > 40) S.recs.shift().remove();   // como mucho 40 grabaciones en memoria
 }
 function beep(freqs, when, vol = 0.18) {
   if (!S.ctx || !$('beepTgl').checked) return;
@@ -909,6 +939,12 @@ function onCap(e) {
   if (d.pcm) { sendFrame(d.pcm, 0); return; }
   if (d.end) {
     sendFrame(null, 1);
+    if (S.own.length) {
+      const all = new Int16Array(S.own.length * FRAME);
+      S.own.forEach((c, i) => all.set(c, i * FRAME));
+      if (S.rec) logVoice(S.nick, all, true);
+    }
+    S.own = [];
     if (!S.tx) idleMic();
     syncSession();
   }
@@ -920,7 +956,7 @@ function sendFrame(pcm, last) {
   head[5] = S.txId; head[6] = S.seq >> 8; head[7] = S.seq & 255;
   head[8] = (S.enc.p >> 8) & 255; head[9] = S.enc.p & 255; head[10] = S.enc.i; head[11] = last;
   let body = new Uint8Array(0);
-  if (pcm) { body = adpcmEnc(pcm, S.enc); S.seq++; }
+  if (pcm) { body = adpcmEnc(pcm, S.enc); if (S.rec) S.own.push(pcm); S.seq++; }
   publish(cat([head, body]));
 }
 async function publish(plain) {
@@ -940,7 +976,7 @@ async function startTx() {
   micEnable(true);
   if (IOS) await waitUnmuted(400);
   if (tok !== S.txTok || !S.tx) { if (!S.tx) idleMic(); return; }
-  S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 };
+  S.txId = (S.txId + 1) & 255; S.seq = 0; S.enc = { p: 0, i: 0 }; S.own = [];
   S.cap.port.postMessage({ on: 1 });
   S.txStart = Date.now(); clearInterval(S.txIv); S.txIv = setInterval(render, 1000); render();
   beep([1200]);                             // pitido: ya puedes hablar
@@ -1042,7 +1078,7 @@ function onAudio(pt) {
   if (tx === p.doneTx) return;
   let st = p.rx;
   if (st && st.tx !== tx) { finishRx(p); st = null; }
-  if (!st) { st = p.rx = { tx, base: null, got: new Set(), max: -1, endAt: 0, prev: 0 }; if (bg.t0) bg.rx++; }
+  if (!st) { st = p.rx = { tx, base: null, got: new Set(), chunks: S.rec ? [] : null, max: -1, endAt: 0, prev: 0 }; if (bg.t0) bg.rx++; }
   if (pt.length > 16) {
     const pcm = adpcmDec(pt.subarray(16), ((pt[8] << 8) | pt[9]) << 16 >> 16, Math.min(88, pt[10]));
     const now = S.ctx.currentTime;
@@ -1053,6 +1089,7 @@ function onAudio(pt) {
       playAt(pcm, when, seq === st.max + 1 ? st.prev : 0);
       st.endAt = Math.max(st.endAt, when + FRAME_S);
     }
+    if (st.chunks && !st.got.has(seq)) st.chunks[seq] = pcm;
     st.got.add(seq);
     if (seq > st.max) { st.max = seq; st.prev = pcm[pcm.length - 1]; }
     let pk = 0; for (let i = 0; i < pcm.length; i += 16) { const a = Math.abs(pcm[i]); if (a > pk) pk = a; }
@@ -1068,7 +1105,12 @@ function finishRx(p) {
   p.rx = null; p.doneTx = st.tx;
   clearTimeout(p.tmo);
   setTimeout(() => { if (p.doneTx === st.tx) p.doneTx = -1; }, 3000);
-  if (st.max >= 0) beep([900, 600], st.endAt + 0.03);     // el audio no se guarda: suena y se descarta
+  if (st.max >= 0) beep([900, 600], st.endAt + 0.03);
+  if (st.chunks && S.rec && st.max >= 0) {  // por defecto el audio no se guarda; solo con REC activado en este móvil
+    const all = new Int16Array((st.max + 1) * FRAME);
+    st.chunks.forEach((c, i) => { if (c) all.set(c, i * FRAME); });
+    logVoice(p.nick, all, false);
+  }
   const wait = Math.max(0, (st.endAt - S.ctx.currentTime) * 1000);
   setTimeout(() => { if (!p.rx) { p.talk = false; if (!S.tx) meter(0); render(); } }, wait);
 }
@@ -1309,6 +1351,7 @@ function render() {
   $('count').textContent = '👥 ' + L('members', S.peers.size + 1);
   $('outBtn').textContent = L(S.out === 'spk' ? 'out_spk' : 'out_ear');
   $('outBtn').classList.toggle('loud', S.out === 'spk');
+  $('recBtn').classList.toggle('on', S.rec); $('recBtn').setAttribute('aria-pressed', S.rec ? 'true' : 'false');
 
   ptt.classList.toggle('tx', S.tx);
   ptt.classList.toggle('rx', !S.tx && talkers.length > 0);
@@ -1391,7 +1434,7 @@ async function join() {
     $('chanName').textContent = chan;
     $('joinPanel').hidden = true; $('radioPanel').hidden = false;
     $('app').classList.add('in'); setTab('radio');
-    $('log').textContent = '';
+    $('log').textContent = ''; S.recs = [];
     try { history.replaceState(null, '', '#' + chan); } catch {}
     log(L('in_chan', chan, S.nick), {});
     $('chatIn').disabled = false; $('chatSend').disabled = false;
@@ -1427,7 +1470,8 @@ async function leave() {
 }
 async function wipe() {
   await leave();
-  store.del('w.chan'); store.del('w.nick');
+  store.del('w.chan'); store.del('w.nick'); store.del('w.rec'); S.rec = false; S.recs = []; S.own = [];
+  try { if (S.playing) S.playing.stop(); } catch {}
   $('chan').value = ''; $('nick').value = ''; updCount();
   $('log').textContent = '';
   try { history.replaceState(null, '', location.pathname + location.search); } catch {}
@@ -1483,6 +1527,7 @@ $('invShare').onclick = shareInvite;
 $('invCopy').onclick = copyInvite;
 $('langBtn').onclick = () => { lang = lang === 'es' ? 'ca' : 'es'; store.set('w.lang', lang); applyLang(); };
 $('themeBtn').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+$('recBtn').onclick = () => { S.rec = !S.rec; store.set('w.rec', S.rec ? '1' : '0'); vibe(20); log(L(S.rec ? 'rec_on' : 'rec_off'), {}); render(); };
 $('outBtn').onclick = () => { S.out = S.out === 'spk' ? 'ear' : 'spk'; store.set('w.out', S.out); vibe(20); applyOutput(true); };
 if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', () => { if (S.joined) applyOutput(false); });
 $('vol').oninput = e => { if (S.master) S.master.gain.value = +e.target.value; store.set('w.vol', e.target.value); };
@@ -1540,6 +1585,7 @@ $('vol').value = store.get('w.vol') || '1';
 $('beepTgl').checked = store.get('w.beep') !== '0';
 $('tapTgl').checked = store.get('w.tap') === '1';
 S.out = store.get('w.out') === 'ear' ? 'ear' : 'spk';
+S.rec = store.get('w.rec') === '1';
 setTheme(document.documentElement.dataset.theme || 'light');
 applyLang();
 // Si el navegador recargó la página (pasa mucho en el móvil), vuelve a entrar solo en el canal en el que estabas
