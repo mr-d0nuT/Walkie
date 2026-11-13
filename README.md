@@ -14,7 +14,7 @@ Son archivos estáticos: sirve cualquier hosting (Cloudflare Pages, Netlify…).
 
 ## Pensado para la calle
 
-- **Avisos con ubicación**: 👮 Policía (azul), ⚠️ Altercado (negro), 🆘 SOS (rojo) y 📍 Estoy aquí (verde). Un toque inicia una cuenta atrás de 3 s (2 s en SOS) que se cancela con otro toque, para evitar avisos sin querer. Los demás ven una ventana pequeña con mapa, distancia y dirección hacia ti. No tapa el botón de hablar. Quien lo envía puede **anular** el aviso.
+- **Avisos con ubicación**: 🚑 Médico (azul), ⚠️ Incidencia (negro), 🆘 SOS (rojo) y 📍 Estoy aquí (verde). Un toque inicia una cuenta atrás de 3 s (2 s en SOS) que se cancela con otro toque, para evitar avisos sin querer. Los demás ven una ventana pequeña con mapa, distancia y dirección hacia ti, y un botón grande para abrir el mapa. No tapa el botón de hablar. Quien lo envía puede **anular** el aviso.
 - **Pantalla apagada (Android)**: mientras estás en el canal la app reproduce en bucle un audio inaudible, como hace una radio online, para que el sistema no la duerma con la pantalla apagada. Aparece una ficha «Walkie-Talkie» en la pantalla de bloqueo. Para hablar hay que encender la pantalla. Al volver a encenderla, el chat dice cuánto estuvo apagada, si la app siguió escuchando y cuántas transmisiones recibió.
 - **Botón grande «Abrir mapa»** en cada aviso con ubicación: abre la app de mapas del móvil con un pin en el punto.
 - **Vuelve a entrar sola**: si el navegador recarga la página (pasa mucho en el móvil), la app entra otra vez en el canal en el que estabas, salvo que hubieras salido con la papelera.

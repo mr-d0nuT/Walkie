@@ -289,7 +289,7 @@ input[type=text]:focus{border-color:var(--red)}
 
         <div class="lbl alertslbl" data-i="alerts_lbl"></div>
         <div class="alerts">
-          <button class="al pol" type="button" data-k="pol"><span class="ic">👮</span><span class="tx"></span></button>
+          <button class="al pol" type="button" data-k="pol"><span class="ic">🚑</span><span class="tx"></span></button>
           <button class="al alt" type="button" data-k="alt"><span class="ic">⚠️</span><span class="tx"></span></button>
           <button class="al sos" type="button" data-k="sos"><span class="ic">🆘</span><span class="tx"></span></button>
           <button class="al loc" type="button" data-k="loc"><span class="ic">📍</span><span class="tx"></span></button>
@@ -407,8 +407,8 @@ const I = {
     ptt_hold: 'MANTÉN PARA HABLAR', ptt_tap: 'TOCA PARA HABLAR', ptt_on: 'HABLANDO', ptt_listen: 'SOLO ESCUCHA',
     sub_space: 'o la barra espaciadora', sub_release: 'suelta para escuchar', sub_tapstop: 'toca para soltar', sub_rx: 'recibiendo…', sub_nomic: 'micrófono no disponible',
     tap_mode: 'tocar en vez de mantener', beeps: 'pitidos', vol: 'vol',
-    alerts_lbl: 'Avisos con tu ubicación', al_pol: 'Policía', al_alt: 'Altercado', al_sos: 'SOS', al_loc: 'Estoy aquí',
-    n_pol: 'PRESENCIA POLICIAL', n_alt: 'ALTERCADO', n_sos: 'SOS', n_loc: 'UBICACIÓN',
+    alerts_lbl: 'Avisos con tu ubicación', al_pol: 'Médico', al_alt: 'Incidencia', al_sos: 'SOS', al_loc: 'Estoy aquí',
+    n_pol: 'AYUDA MÉDICA', n_alt: 'INCIDENCIA', n_sos: 'SOS', n_loc: 'UBICACIÓN',
     cancel_n: '✕ Cancelar · {0}', locating: 'Ubicando…', sent_to: 'Enviado a {0}', sent_none: 'Enviado · nadie más conectado ahora',
     sent_q: 'Sin cobertura: saldrá al volver', undo: 'Anular', cleared: '{0} ha anulado su aviso', cleared_me: 'Has anulado tu aviso',
     noloc: 'sin ubicación', acc: '±{0} m', open_map: 'Abrir mapa', see_map: 'ver mapa', ago: 'hace {0} min', just_now: 'ahora', close: 'Cerrar', nearby: 'aquí al lado',
@@ -440,8 +440,8 @@ const I = {
     ptt_hold: 'MANTÉN PER PARLAR', ptt_tap: 'TOCA PER PARLAR', ptt_on: 'PARLANT', ptt_listen: 'NOMÉS ESCOLTES',
     sub_space: 'o la barra espaiadora', sub_release: 'deixa anar per escoltar', sub_tapstop: 'toca per deixar-ho', sub_rx: 'rebent…', sub_nomic: 'micròfon no disponible',
     tap_mode: 'tocar en lloc de mantenir', beeps: 'pitets', vol: 'vol',
-    alerts_lbl: 'Avisos amb la teva ubicació', al_pol: 'Policia', al_alt: 'Aldarull', al_sos: 'SOS', al_loc: 'Sóc aquí',
-    n_pol: 'PRESÈNCIA POLICIAL', n_alt: 'ALDARULL', n_sos: 'SOS', n_loc: 'UBICACIÓ',
+    alerts_lbl: 'Avisos amb la teva ubicació', al_pol: 'Metge', al_alt: 'Incidència', al_sos: 'SOS', al_loc: 'Sóc aquí',
+    n_pol: 'AJUDA MÈDICA', n_alt: 'INCIDÈNCIA', n_sos: 'SOS', n_loc: 'UBICACIÓ',
     cancel_n: '✕ Cancel·la · {0}', locating: 'Ubicant…', sent_to: 'Enviat a {0}', sent_none: 'Enviat · ningú més connectat ara',
     sent_q: 'Sense cobertura: sortirà en tornar', undo: 'Anul·la', cleared: '{0} ha anul·lat el seu avís', cleared_me: 'Has anul·lat el teu avís',
     noloc: 'sense ubicació', acc: '±{0} m', open_map: 'Obre el mapa', see_map: 'veure mapa', ago: 'fa {0} min', just_now: 'ara', close: 'Tanca', nearby: 'aquí al costat',
@@ -1172,7 +1172,7 @@ function distText(a, b) {
 
 /* ---------- avisos con ubicación ---------- */
 const AL = {
-  pol: { ico: '👮', beep: [660, 660], ttl: 25000, delay: 3 },
+  pol: { ico: '🚑', beep: [660, 660], ttl: 25000, delay: 3 },
   alt: { ico: '⚠️', beep: [520, 400, 520], ttl: 25000, delay: 3 },
   sos: { ico: '🆘', beep: [1800, 1300, 1800, 1300, 1800], ttl: 0, delay: 2 },
   loc: { ico: '📍', beep: [1000], ttl: 20000, delay: 0 }
